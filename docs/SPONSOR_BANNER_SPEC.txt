@@ -1,0 +1,142 @@
+================================================================
+RUGBY LEAGUE TAKEOVER - SPONSOR BANNER ARTWORK SPEC
+For: Stadium Swim (and any future banner sponsor)
+Slot: "Banner Top" - the full-width strip under the nav on every page
+================================================================
+
+SHORT VERSION - ASK THEM FOR TWO FILES
+--------------------------------------
+  1. DESKTOP    1456 x 180 px   (displays at 728 x 90)
+  2. MOBILE      640 x 200 px   (displays at 320 x 100)
+
+  Format:  PNG (preferred) or JPG
+  Colour:  RGB / sRGB
+  Max size: 300 KB each (hard ceiling 500 KB)
+
+That is everything. Two files, those two pixel sizes, PNG.
+
+
+WHY TWO FILES
+-------------
+The banner is responsive. On a computer it is a wide, short
+leaderboard strip. On a phone that shape is unreadable, so the site
+swaps to a shorter, chunkier mobile strip instead. The artwork has to
+be designed for each shape - a desktop banner shrunk to phone width
+becomes an unreadable sliver.
+
+The site serves the right one automatically: you upload both and tag
+one "Desktop" and one "Mobile" in the admin (see UPLOADING below).
+
+
+FULL SPECS
+----------
+
+DESKTOP BANNER
+  Display size .... 728 x 90 px   (IAB Leaderboard - industry standard)
+  Supply at ....... 1456 x 180 px (2x, for retina/4K screens)
+  Aspect ratio .... 8.09 : 1 (very wide and short)
+  Shows on ........ screens 768 px wide and up (laptops, desktops,
+                    iPad landscape)
+
+MOBILE BANNER
+  Display size .... 320 x 100 px  (IAB Large Mobile Banner)
+  Supply at ....... 640 x 200 px  (2x)
+  Aspect ratio .... 3.2 : 1
+  Shows on ........ screens under 768 px wide (all phones,
+                    iPad portrait)
+
+Supply at 2x and let the site scale down - that is what keeps it
+sharp on a modern phone or a Retina MacBook. Do NOT supply at 1x
+only; it will look soft.
+
+
+FILE FORMAT - WHAT TO ASK FOR
+-----------------------------
+  PNG  - USE THIS for anything with a logo, text, flat colour or
+         sharp edges. Which is nearly every sponsor banner.
+         PNG-24 with a white or solid background.
+
+  JPG  - only if the banner is mostly a PHOTOGRAPH (e.g. a shot of
+         the pool deck). Save at quality 80-85.
+
+  NOT ACCEPTED / DO NOT ASK FOR:
+    - SVG      (the ad slot will not render it reliably)
+    - GIF      (animation is not supported in this slot)
+    - WebP     (works in most browsers but not all - avoid)
+    - PDF, AI, EPS, PSD, TIFF  (not web formats - if they only have
+      these, ask them to export a PNG at the sizes above)
+    - Anything with transparency. The site background is dark;
+      a transparent PNG with dark text will disappear. Ask for a
+      solid background baked in.
+
+  File size: under 300 KB each. A 1456x180 PNG should come in well
+  under that. If they send a 4 MB file, ask them to re-export - it
+  slows the page down for everyone on mobile data.
+
+
+ARTWORK / DESIGN NOTES TO PASS ON
+---------------------------------
+  - SAFE MARGIN: keep logos and text at least 12 px (desktop) /
+    8 px (mobile) in from every edge, measured at display size.
+    So 24 px / 16 px in on the 2x files they supply.
+
+  - The image is centred and scaled to fit the slot. It is never
+    cropped and never stretched - so if they supply the wrong
+    aspect ratio it will simply render smaller with empty space
+    either side. Hence: exact ratios, please.
+
+  - TEXT SIZE: minimum 14 px at display size (28 px on the 2x file).
+    A desktop banner is only 90 px tall - a paragraph will not fit.
+    One line of headline plus a logo plus a call to action is the
+    realistic maximum.
+
+  - No small print, no phone numbers in 8 pt type, no QR codes.
+    Nobody can read them at 90 px tall.
+
+  - It sits on a DARK background with a thin border. A banner with a
+    dark edge will blend into the page - a light or brand-coloured
+    background reads much better.
+
+  - They should also supply:
+      * the CLICK-THROUGH URL (where tapping the banner should go -
+        must be https://)
+      * the ALT TEXT / campaign name (shown to screen readers, and
+        used as the ad's title in the admin)
+      * the START and END dates if it is a fixed-term campaign
+
+
+UPLOADING (admin side - internal note)
+--------------------------------------
+Command Centre -> Ads:
+
+  Ad 1:  Position = Banner Top
+         Size     = Leaderboard (728 x 90)
+         Device   = Desktop
+         Image    = the 1456 x 180 file
+
+  Ad 2:  Position = Banner Top
+         Size     = Large Mobile Banner (320 x 100)
+         Device   = Mobile
+         Image    = the 640 x 200 file
+
+Both can carry the same click-through URL and the same schedule.
+The site picks between them at the 768 px breakpoint, so a visitor
+only ever sees one.
+
+If you upload only ONE ad and leave Device = All, that single
+creative is used on both desktop and mobile. It will still fit
+(nothing breaks, nothing is cropped) but it will render small with
+empty space on whichever shape it was not designed for. Two files is
+strongly preferred.
+
+
+ONE-LINE EMAIL YOU CAN SEND STADIUM SWIM
+----------------------------------------
+"Could we get the banner artwork as two PNGs please - 1456 x 180 px
+for desktop and 640 x 200 px for mobile (that's 2x the display size
+so it stays sharp on retina screens). Solid background rather than
+transparent, under 300 KB each, and keep logos/text about 24 px in
+from the edges. If you can also send the link it should click
+through to, we'll get it live."
+
+================================================================

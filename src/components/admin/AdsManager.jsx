@@ -29,6 +29,7 @@ const SIZES = [
   { key: "medium-rectangle",  label: "Medium Rectangle",  dim: "300 × 250", w: 300, h: 250 },
   { key: "wide-skyscraper",   label: "Wide Skyscraper",   dim: "160 × 600", w: 160, h: 600 },
   { key: "mobile-banner",     label: "Mobile Banner",     dim: "320 × 50",  w: 320, h: 50 },
+  { key: "large-mobile-banner", label: "Large Mobile Banner", dim: "320 × 100", w: 320, h: 100 },
 ];
 
 const emptyAd = () => ({

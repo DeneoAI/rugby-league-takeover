@@ -102,13 +102,18 @@ export default function PublicLayout() {
       <PublicOfflineBanner />
 
       {/* Sponsored Ad Slot — banner top, above content, all pages. The wrapper
-          collapses (empty:hidden) when there's no ad so it never leaves a gap;
-          nav clearance lives on the ad itself so it sits below the fixed header. */}
-      <div className="empty:hidden w-full border-b border-border/30">
+          collapses (empty:hidden) when there's no ad so it never leaves a gap.
+          All padding — nav clearance, gutter, bottom spacing — lives on the
+          WRAPPER, never on the AdSlot: the slot is the element carrying
+          aspect-ratio/min-height, so padding there is subtracted from the
+          reserved box instead of added around it. With pt-[4.5rem] on the slot
+          a 728×90 leaderboard rendered 696×86 starting 72px down and spilled
+          68px past the bottom border, over the top of the page content. */}
+      <div className="empty:hidden w-full border-b border-border/30 px-4 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] pb-4">
         <AdSlot
           position="banner-top"
-          size="leaderboard"
-          className="mx-auto block w-full max-w-5xl px-4 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] pb-4"
+          size="banner"
+          className="mx-auto block w-full max-w-5xl"
         />
       </div>
 

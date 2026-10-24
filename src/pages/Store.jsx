@@ -1399,7 +1399,7 @@ export default function Store() {
           )}
           {/* Sponsored */}
           <div className="py-8">
-            <AdSlot position="banner-bottom" size="leaderboard" className="w-full" />
+            <AdSlot position="banner-bottom" size="banner" className="w-full" />
           </div>
           <StoreSizeGuide />
           <StoreFaq />

@@ -448,7 +448,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <div className="mx-auto max-w-5xl px-4 py-8">
-            <AdSlot position="banner-bottom" size="leaderboard" className="w-full" />
+            <AdSlot position="banner-bottom" size="banner" className="w-full" />
           </div>
         </motion.div>
 

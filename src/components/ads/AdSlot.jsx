@@ -6,6 +6,11 @@ const SIZE_MAP = {
   "medium-rectangle": { w: 300, h: 250, label: "300 × 250" },
   "wide-skyscraper":  { w: 160, h: 600, label: "160 × 600" },
   "mobile-banner":    { w: 320, h: 50,  label: "320 × 50" },
+  // IAB large mobile banner — the phone counterpart to the desktop
+  // leaderboard. A banner strip must not fall back to a 300×250 square:
+  // banner positions cap the creative at 120px tall (AdSlotRuntime), so a
+  // square renders at 144×120 inside a 250px box, marooned in dead space.
+  "large-mobile-banner": { w: 320, h: 100, label: "320 × 100" },
 };
 
 const RESPONSIVE_FALLBACKS = {
@@ -13,6 +18,12 @@ const RESPONSIVE_FALLBACKS = {
   "medium-rectangle": [{ minW: 300, key: "medium-rectangle" }, { minW: 0, key: "mobile-banner" }],
   "wide-skyscraper":  [{ minW: 160, key: "wide-skyscraper" }],
   "mobile-banner":    [{ minW: 0, key: "mobile-banner" }],
+  // Full-width banner strips (banner-top / banner-bottom): stay a strip all
+  // the way down rather than becoming a rectangle on phones.
+  // 280, not 320: the banner-top gutter leaves a 288px container on a 320px
+  // viewport, and a minW of 320 dropped those phones to the 320×50 preset —
+  // so one 320×100 mobile creative overflowed its slot by 40px there.
+  banner:             [{ minW: 728, key: "leaderboard" }, { minW: 280, key: "large-mobile-banner" }, { minW: 0, key: "mobile-banner" }],
 };
 
 // Lazy load the runtime so it's not part of the initial app bundle

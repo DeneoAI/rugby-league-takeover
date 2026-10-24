@@ -9,11 +9,12 @@ SHORT VERSION - ASK THEM FOR TWO FILES
   1. DESKTOP    1456 x 180 px   (displays at 728 x 90)
   2. MOBILE      640 x 200 px   (displays at 320 x 100)
 
-  Format:  PNG (preferred) or JPG
+  Format:  PNG (still) or GIF / WebP (animated) - all supported
   Colour:  RGB / sRGB
-  Max size: 300 KB each (hard ceiling 500 KB)
+  Max size: 300 KB each still, 1 MB each animated
 
-That is everything. Two files, those two pixel sizes, PNG.
+That is everything. Two files, those two pixel sizes.
+MOVING BANNERS ARE SUPPORTED - see the ANIMATION section below.
 
 
 WHY TWO FILES
@@ -52,6 +53,8 @@ only; it will look soft.
 
 FILE FORMAT - WHAT TO ASK FOR
 -----------------------------
+
+STILL BANNERS
   PNG  - USE THIS for anything with a logo, text, flat colour or
          sharp edges. Which is nearly every sponsor banner.
          PNG-24 with a white or solid background.
@@ -59,20 +62,38 @@ FILE FORMAT - WHAT TO ASK FOR
   JPG  - only if the banner is mostly a PHOTOGRAPH (e.g. a shot of
          the pool deck). Save at quality 80-85.
 
-  NOT ACCEPTED / DO NOT ASK FOR:
-    - SVG      (the ad slot will not render it reliably)
-    - GIF      (animation is not supported in this slot)
-    - WebP     (works in most browsers but not all - avoid)
+  File size: under 300 KB each.
+
+ANIMATED / MOVING BANNERS - YES, THESE WORK
+  GIF   - animated GIF plays fine. The familiar option, and the one
+          most agencies will offer by default. Downside: it is
+          limited to 256 colours and the files are big, so a
+          photographic or gradient-heavy animation will look banded.
+
+  WebP  - animated WebP also plays fine, and it is the BETTER ask:
+          full colour, and roughly 3x smaller than the same GIF.
+          If Stadium Swim's designer can export one, take it.
+          Supported by every browser the site runs in, including
+          the iOS and Android apps.
+
+  Either is fine. If in doubt, ask for "animated GIF, or animated
+  WebP if you can export it".
+
+  File size for animation: under 1 MB desktop, under 500 KB mobile.
+  This matters - the banner is at the top of every page, and a
+  4 MB GIF is a visibly slower site for anyone on mobile data.
+
+  NOT SUPPORTED - DO NOT ASK FOR:
+    - MP4 / MOV / WebM or any video file. The banner is an image
+      slot, not a video player. A video file will not display
+      at all.
+    - SVG      (animated or not - will not render reliably here)
     - PDF, AI, EPS, PSD, TIFF  (not web formats - if they only have
-      these, ask them to export a PNG at the sizes above)
-    - Anything with transparency. The site background is dark;
-      a transparent PNG with dark text will disappear. Ask for a
-      solid background baked in.
+      these, ask them to export to the sizes above)
 
-  File size: under 300 KB each. A 1456x180 PNG should come in well
-  under that. If they send a 4 MB file, ask them to re-export - it
-  slows the page down for everyone on mobile data.
-
+  TRANSPARENCY: avoid it, animated or still. The site background is
+  dark, so a transparent PNG/GIF with dark text will disappear. Ask
+  for a solid background baked in.
 
 ARTWORK / DESIGN NOTES TO PASS ON
 ---------------------------------
@@ -105,6 +126,27 @@ ARTWORK / DESIGN NOTES TO PASS ON
       * the START and END dates if it is a fixed-term campaign
 
 
+IF THEY SEND AN ANIMATED BANNER - RULES TO PASS ON
+--------------------------------------------------
+  - Keep it to about 5 seconds. Looping is fine.
+
+  - NO RAPID FLASHING. Nothing that flashes or strobes more than
+    three times per second. This is a genuine accessibility and
+    seizure-safety rule (WCAG 2.3.1), not a style preference.
+
+  - The FIRST FRAME must work on its own. It is what shows while
+    the file is still loading, what shows if the file fails, and
+    what appears in any screenshot of the site. It should contain
+    the logo and the message - not a blank lead-in.
+
+  - Gentle movement reads better than frantic movement at 90 px
+    tall. A slow wipe, a fade between two messages, or a subtle
+    shine is plenty. Anything faster looks like a pop-up ad.
+
+  - Same pixel dimensions as the still versions: 1456 x 180
+    desktop, 640 x 200 mobile.
+
+
 UPLOADING (admin side - internal note)
 --------------------------------------
 Command Centre -> Ads:
@@ -132,11 +174,14 @@ strongly preferred.
 
 ONE-LINE EMAIL YOU CAN SEND STADIUM SWIM
 ----------------------------------------
-"Could we get the banner artwork as two PNGs please - 1456 x 180 px
+"Could we get the banner artwork as two files please - 1456 x 180 px
 for desktop and 640 x 200 px for mobile (that's 2x the display size
-so it stays sharp on retina screens). Solid background rather than
-transparent, under 300 KB each, and keep logos/text about 24 px in
-from the edges. If you can also send the link it should click
-through to, we'll get it live."
+so it stays sharp on retina screens). PNG is ideal for a still
+banner. If you'd rather it moved, an animated GIF works, or animated
+WebP if you can export one - keep it to about 5 seconds, no rapid
+flashing, and under 1 MB. Either way: solid background rather than
+transparent, and keep logos/text about 24 px in from the edges. If
+you can also send the link it should click through to, we'll get it
+live. One thing we can't take is video files - MP4 won't display."
 
 ================================================================

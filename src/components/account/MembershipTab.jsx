@@ -1,13 +1,16 @@
-import React from "react";
-import { ShieldCheck, Ticket, MessageSquare, Percent, Calendar } from "lucide-react";
+import React, { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ShieldCheck, Ticket, MessageSquare, Percent, Calendar, MapPin } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import MembershipCard from "@/components/membership/MembershipCard";
 import {
-  isActiveMember, formatMembershipDate, membershipStatusLine, MEMBERSHIP_TERM_MONTHS,
+  isActiveMember, formatMembershipDate, membershipStatusLine, MEMBERSHIP_TERM_MONTHS, liveDiscounts,
 } from "@/lib/membership";
 
+// Fixed perks of being a member. The discounts themselves are admin-managed
+// (Admin → Store → Member Discounts) and listed above these.
 const BENEFITS = [
-  { icon: Percent, title: "Bar discounts", text: "Show your card at the bar for member pricing on the night." },
   { icon: ShieldCheck, title: "RLT Member badge", text: "Your posts carry the member badge across the forum." },
   { icon: Ticket, title: "Member events", text: "First access to member-only events and ticket releases." },
   { icon: MessageSquare, title: "Backing the club", text: "Every membership goes straight back into the takeover." },
@@ -16,6 +19,13 @@ const BENEFITS = [
 export default function MembershipTab() {
   const { user } = useAuth();
   const active = isActiveMember(user);
+  const { data: discountRows = [] } = useQuery({
+    queryKey: ["membershipDiscounts"],
+    queryFn: () => base44.entities.MembershipDiscount.list("sort_order", 100),
+    retry: false,
+    meta: { silent: true },
+  });
+  const discounts = useMemo(() => liveDiscounts(discountRows), [discountRows]);
 
   return (
     <div className="grid gap-5">
@@ -56,6 +66,39 @@ export default function MembershipTab() {
 
       <div className="border border-border/50 bg-card/20 p-5">
         <h3 className="font-display text-base uppercase tracking-wide text-foreground">What you get</h3>
+        {discounts.length > 0 && (
+          <ul className="mt-4 grid gap-3">
+            {discounts.map((discount) => (
+              <li key={discount.id} className="flex items-start gap-3 border border-primary/30 bg-primary/5 p-3">
+                <Percent className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-xs font-bold text-foreground">{discount.title}</p>
+                    {discount.discount_label && (
+                      <span className="border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                        {discount.discount_label}
+                      </span>
+                    )}
+                  </div>
+                  {discount.description && (
+                    <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">{discount.description}</p>
+                  )}
+                  {discount.venue && (
+                    <p className="mt-1 flex items-center gap-1 text-[10px] text-slate-400">
+                      <MapPin className="h-3 w-3 shrink-0" /> {discount.venue}
+                    </p>
+                  )}
+                  {discount.how_to_redeem && (
+                    <p className="mt-1 text-[10px] text-slate-500">{discount.how_to_redeem}</p>
+                  )}
+                  {discount.ends_at && (
+                    <p className="mt-1 text-[10px] text-amber-300/80">Until {formatMembershipDate(discount.ends_at)}</p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {BENEFITS.map((benefit) => (
             <div key={benefit.title} className="flex items-start gap-3 border border-border/20 bg-black/20 p-3">

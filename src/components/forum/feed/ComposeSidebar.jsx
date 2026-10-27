@@ -41,7 +41,7 @@ export default function ComposeSidebar({ draft, setDraft, isAuthenticated, user,
   return (
     <aside className="sticky top-24 space-y-4">
       {/* Compose Card */}
-      <div className="border border-border/60 bg-card/30 cmd-glass overflow-hidden">
+      <div id="forum-compose-card" className="scroll-mt-28 border border-border/60 bg-card/30 cmd-glass overflow-hidden">
         <div className="h-[2px] w-full cmd-accent-bar" />
         <div className="p-5">
           <div className="flex items-center gap-3 mb-1">
@@ -49,7 +49,7 @@ export default function ComposeSidebar({ draft, setDraft, isAuthenticated, user,
               <MessageSquare className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h2 className="font-display text-lg uppercase tracking-wide">{editTarget ? "Edit Discussion" : "Start a Discussion"}</h2>
+              <h2 className="font-display text-lg uppercase tracking-wide">{editTarget ? "Edit Discussion" : "New Post"}</h2>
               <p className="text-[8px] font-mono uppercase tracking-wider text-slate-300">Connect with fellow fans</p>
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function ComposeSidebar({ draft, setDraft, isAuthenticated, user,
 
             <div className="space-y-1">
               <label className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-200">Topic Title</label>
-              <Input required placeholder="What's on your mind?" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="h-11 rounded-none border-border bg-background text-sm" />
+              <Input id="forum-compose-title" required placeholder="What's on your mind?" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="h-11 rounded-none border-border bg-background text-sm" />
             </div>
 
             <div className="space-y-1">

@@ -15,6 +15,13 @@
  * target for a short window, absorbing any reflow from the one or two sections
  * within the lazy pre-load margin above it, until the position holds still.
  *
+ * The jump MUST be instant. index.css sets `html { scroll-behavior: smooth }`,
+ * which silently turns every plain `window.scrollTo` into an animation — i.e.
+ * the very fly-through this helper exists to avoid. Each re-pin then restarted
+ * the animation mid-flight and the loop declared "settled" while the page was
+ * still gliding through hydrating sections, so About Us landed thousands of
+ * pixels short. `jumpTo` overrides the CSS for the duration of the call.
+ *
  * For a target that itself lives inside a lazy section (e.g.
  * "#travel-registration" inside TravelSection), pass `prescroll` with an anchor
  * that is always in the DOM (its wrapper, e.g. "#travel"); the helper jumps
@@ -25,6 +32,40 @@ const DEFAULT_OFFSET = 80; // matches the home section wrappers' scrollMarginTop
 const WAIT_FOR_TARGET_MS = 4000; // element may not be mounted yet (route change / lazy)
 const SETTLE_BUDGET_MS = 1600; // hard cap on the re-pin loop
 const STABLE_FRAMES = 4; // consecutive still frames that count as "settled"
+const HOLD_MS = 3000; // after settling, keep the target pinned through late reflows
+
+function jumpTo(top) {
+  const root = document.documentElement;
+  const previous = root.style.scrollBehavior;
+  root.style.scrollBehavior = "auto";
+  window.scrollTo(0, top);
+  root.style.scrollBehavior = previous;
+}
+
+// Sections above the target can still grow after the re-pin loop has settled
+// (a lazy chunk, fetched news/settings or images arriving on a slow mobile
+// connection), which pushes the target down the page. For a short window,
+// re-pin whenever the page resizes — but hand control back the moment the user
+// scrolls themselves.
+function holdPosition(topFor, hash) {
+  if (typeof ResizeObserver === "undefined") return;
+  const userEvents = ["wheel", "touchstart", "keydown", "pointerdown"];
+  let done = false;
+  const stop = () => {
+    if (done) return;
+    done = true;
+    observer.disconnect();
+    clearTimeout(timer);
+    userEvents.forEach((type) => window.removeEventListener(type, stop, true));
+  };
+  const observer = new ResizeObserver(() => {
+    const top = topFor(hash);
+    if (top !== null && Math.abs(window.scrollY - top) > 1) jumpTo(top);
+  });
+  observer.observe(document.body);
+  const timer = setTimeout(stop, HOLD_MS);
+  userEvents.forEach((type) => window.addEventListener(type, stop, { capture: true, passive: true }));
+}
 
 export function scrollToAnchor(hash, { offset = DEFAULT_OFFSET, prescroll = null, updateHistory = true } = {}) {
   if (typeof document === "undefined" || typeof hash !== "string" || !hash.startsWith("#")) return;
@@ -66,7 +107,7 @@ export function scrollToAnchor(hash, { offset = DEFAULT_OFFSET, prescroll = null
       if (prescroll && !prescrolled) {
         const pTop = topFor(prescroll);
         if (pTop !== null) {
-          window.scrollTo(0, pTop);
+          jumpTo(pTop);
           prescrolled = true;
         }
       }
@@ -75,7 +116,7 @@ export function scrollToAnchor(hash, { offset = DEFAULT_OFFSET, prescroll = null
     }
 
     if (!settleStart) settleStart = Date.now();
-    window.scrollTo(0, top);
+    jumpTo(top);
 
     if (lastTop !== null && Math.abs(top - lastTop) <= 1) stable += 1;
     else stable = 0;
@@ -91,6 +132,7 @@ export function scrollToAnchor(hash, { offset = DEFAULT_OFFSET, prescroll = null
           /* history may be unavailable in some embedded contexts */
         }
       }
+      holdPosition(topFor, hash);
       return;
     }
     requestAnimationFrame(frame);

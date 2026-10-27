@@ -47,3 +47,14 @@ test("home section anchors are unique (no duplicate #about)", () => {
   assert.ok(/id="about"/.test(home), "home wrapper owns the #about anchor");
   assert.ok(!/id="about"/.test(about), "AboutSection must not duplicate the #about id");
 });
+
+// Regression guard for "About Us always scrolls to the wrong spot". index.css
+// sets `html { scroll-behavior: smooth }`, which turns a bare window.scrollTo
+// into an animated fly-through — the exact failure the helper exists to avoid.
+test("the helper's jumps are instant despite the global smooth-scroll CSS", () => {
+  const src = read("../src/lib/scroll-to-anchor.js");
+  assert.ok(/scrollBehavior\s*=\s*"auto"/.test(src), "overrides scroll-behavior for the jump");
+  const bareScrolls = src.match(/window\.scrollTo\(/g) || [];
+  assert.equal(bareScrolls.length, 1, "only jumpTo calls window.scrollTo directly");
+  assert.ok(src.includes("ResizeObserver"), "keeps the target pinned through late reflows");
+});

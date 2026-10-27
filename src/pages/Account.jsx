@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
+import { isActiveMember } from "@/lib/membership";
 
 const FanHubTab = lazy(() => import("@/components/account/FanHubTab"));
 const MembershipTab = lazy(() => import("@/components/account/MembershipTab"));
@@ -33,6 +34,7 @@ const OrdersTab = lazy(() => import("@/components/account/OrdersTab"));
 const PostsTab = lazy(() => import("@/components/account/PostsTab"));
 const InterestTab = lazy(() => import("@/components/account/InterestTab"));
 const SecurityTab = lazy(() => import("@/components/account/SecurityTab"));
+const MembershipCard = lazy(() => import("@/components/membership/MembershipCard"));
 
 function AccountTabFallback() {
   return (
@@ -102,6 +104,7 @@ export default function Account() {
   const setActiveTab = (tab) => setSearchParams({ tab }, { replace: true });
   const displayName = user?.full_name || user?.email?.split("@")[0] || "User";
   const avatarLetter = displayName.slice(0, 1).toUpperCase();
+  const activeMember = isActiveMember(user);
 
   // Queries to fetch actual statistics dynamically
   const { data: orders = [] } = useQuery({
@@ -224,6 +227,19 @@ export default function Account() {
             </div>
           </div>
         </motion.div>
+
+        {/* ── MEMBER CARD: the QR members show at the bar, so it sits first ── */}
+        {activeMember && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.04, duration: 0.5 }}
+          >
+            <Suspense fallback={<div className="h-64 animate-pulse border border-primary/30 bg-muted/10" />}>
+              <MembershipCard />
+            </Suspense>
+          </motion.div>
+        )}
 
         {/* ── SECTION 2: MY JOURNEY ── */}
         <motion.div

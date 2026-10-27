@@ -19,7 +19,9 @@ export default function MembershipTab() {
 
   return (
     <div className="grid gap-5">
-      <MembershipCard />
+      {/* Active members see their card at the top of the account page, so the
+          tab only carries the join/renew prompt for everyone else. */}
+      {!active && <MembershipCard />}
 
       <div className="border border-border/50 bg-card/20 p-5">
         <div className="flex items-center gap-2">

@@ -30,6 +30,7 @@ const WRITE_TABLES = {
   GalleryItem: 'gallery_items',
   InterestRegistration: 'interest_registrations',
   Matchup: 'matchups',
+  MembershipDiscount: 'membership_discounts',
   NewsArticle: 'news_articles',
   Notification: 'notifications',
   Partner: 'partners',

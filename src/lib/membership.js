@@ -60,3 +60,38 @@ export function membershipStatusLine(user, now = Date.now()) {
   }
   return "Not a member yet";
 }
+
+// ── Membership discounts ────────────────────────────────────────────────────
+// Admin-managed perks (migration 0038). RLS already hides inactive/out-of-window
+// rows from non-admins, but admins read every row — so the member-facing views
+// filter again here rather than trusting who happens to be looking.
+
+export function discountIsLive(discount, now = Date.now()) {
+  if (!discount || discount.is_active === false) return false;
+  const start = discount.starts_at ? new Date(discount.starts_at).getTime() : null;
+  const end = discount.ends_at ? new Date(discount.ends_at).getTime() : null;
+  if (start != null && !Number.isNaN(start) && start > now) return false;
+  if (end != null && !Number.isNaN(end) && end <= now) return false;
+  return true;
+}
+
+export function sortDiscounts(discounts = []) {
+  return [...discounts].sort(
+    (a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0)
+      || String(a.title || "").localeCompare(String(b.title || ""))
+  );
+}
+
+export function liveDiscounts(discounts = [], now = Date.now()) {
+  return sortDiscounts(discounts.filter((d) => discountIsLive(d, now)));
+}
+
+// Admin list label: why a row is or isn't showing to members right now.
+export function discountStatus(discount, now = Date.now()) {
+  if (discount?.is_active === false) return "hidden";
+  const start = discount?.starts_at ? new Date(discount.starts_at).getTime() : null;
+  if (start != null && start > now) return "scheduled";
+  const end = discount?.ends_at ? new Date(discount.ends_at).getTime() : null;
+  if (end != null && end <= now) return "ended";
+  return "live";
+}

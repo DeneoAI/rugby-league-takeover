@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ShieldCheck, ShieldX, Loader2, Search, ArrowLeft, ScanLine } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { formatMembershipDate } from "@/lib/membership";
+import { formatMembershipDate, liveDiscounts } from "@/lib/membership";
 
 // Bar-side membership check.
 //
@@ -28,6 +29,18 @@ export default function VerifyMember() {
 
   const isStaff = user?.role === "admin" || user?.role === "moderator";
   const token = params.get("t") || "";
+
+  // What staff should apply once the card checks out (Admin → Store → Member
+  // Discounts). Staff may be admins, who can read hidden rows, so filter to
+  // what's live for members right now.
+  const { data: discountRows = [] } = useQuery({
+    queryKey: ["membershipDiscounts"],
+    queryFn: () => base44.entities.MembershipDiscount.list("sort_order", 100),
+    enabled: isStaff,
+    retry: false,
+    meta: { silent: true },
+  });
+  const discounts = useMemo(() => liveDiscounts(discountRows), [discountRows]);
 
   const check = useCallback(async (payload) => {
     setChecking(true);
@@ -128,6 +141,20 @@ export default function VerifyMember() {
               <p className="mt-2 text-xs text-slate-400">
                 Valid until {formatMembershipDate(result.member.expires_at)}
               </p>
+            )}
+            {valid && discounts.length > 0 && (
+              <div className="mt-4 border-t border-emerald-500/30 pt-3 text-left">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">Member discounts</p>
+                <ul className="mt-2 grid gap-1.5">
+                  {discounts.map((discount) => (
+                    <li key={discount.id} className="text-sm text-foreground">
+                      <span className="font-bold">{discount.title}</span>
+                      {discount.discount_label && <span className="text-emerald-300"> · {discount.discount_label}</span>}
+                      {discount.venue && <span className="text-slate-400"> · {discount.venue}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
             {!valid && result.reason && (
               <p className="mt-2 text-sm text-red-200">{result.reason}</p>

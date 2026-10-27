@@ -7,7 +7,7 @@ import {
   MessageSquare, Send, Pin, Search, MessageCircle, Heart,
   TrendingUp, Users, Flame, Sparkles, Clock, Eye,
   X, Radio, ChevronDown, ChevronUp, Trash2,
-  Trophy, Activity, Reply, Shield, Pencil, Flag, Plane, ShoppingBag, CalendarDays, ArrowRight, Bookmark
+  Trophy, Activity, Reply, Shield, Pencil, Flag, Plane, ShoppingBag, CalendarDays, ArrowRight, Bookmark, Plus
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -179,10 +179,10 @@ function SortTabs({ active, onChange }) {
 function ForumQuickActionRail({ onStartDiscussion, onOpenTools }) {
   const quickActions = [
     {
-      icon: MessageSquare,
-      label: "Ask the crowd",
+      icon: Plus,
+      label: "New post",
       body: "Start a thread for flights, hotels, tickets, meetups, or game-day plans.",
-      action: "New thread",
+      action: "Create a post",
       onClick: onStartDiscussion,
       tone: "text-primary border-primary/25 bg-primary/[0.04]",
     },
@@ -727,9 +727,9 @@ const ForumPostCard = memo(function ForumPostCard({
 /* ━━━ Mobile Floating Action Button ━━━━━━━━━━━━━━━━━━━━━━ */
 function MobileFAB({ onClick }) {
   const [scrollDir, setScrollDir] = useState("up");
-  // Hidden near the top of the page: the header already offers "Ask the
-  // crowd" and the feed its own compose button there, and the disc otherwise
-  // permanently covers a 56px circle of content (it sat over the Travel
+  // Hidden near the top of the page: the hero and feed already offer a
+  // "New post" button there, and the pill otherwise permanently covers a
+  // strip of content (the old disc sat over the Travel
   // planning card in the bug report). It fades in once those are off screen.
   const [pastFold, setPastFold] = useState(false);
   const lastScrollY = useRef(0);
@@ -759,7 +759,7 @@ function MobileFAB({ onClick }) {
       whileTap={{ scale: 0.9 }}
       transition={{ duration: 0.2 }}
       className="forum-compose-fab fixed bottom-[calc(5.5rem+var(--safe-bottom))] right-5 z-40 lg:hidden"
-      aria-label="Start a discussion"
+      aria-label="New post"
     >
       <div className="relative">
         {/* Pulse ring */}
@@ -768,8 +768,9 @@ function MobileFAB({ onClick }) {
           animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
         />
-        <div className="relative h-14 w-14 rounded-full bg-primary shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground">
-          <MessageSquare className="h-5 w-5" />
+        <div className="relative h-14 rounded-full bg-primary px-5 shadow-lg shadow-primary/30 flex items-center justify-center gap-2 text-primary-foreground">
+          <Plus className="h-5 w-5" />
+          <span className="text-xs font-extrabold uppercase tracking-wider">New post</span>
         </div>
       </div>
     </motion.button>
@@ -1130,9 +1131,13 @@ export default function Forum() {
   const openDiscussionComposer = useCallback(() => {
     if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
       setMobileTab("feed");
+      // Scroll to the compose card itself, not the top of the sidebar: the
+      // card sits under the rank, missions and ad blocks, so landing on the
+      // sidebar's top looked like the button did nothing.
       requestAnimationFrame(() => {
-        const composer = document.getElementById("forum-compose-sidebar");
+        const composer = document.getElementById("forum-compose-card") || document.getElementById("forum-compose-sidebar");
         if (composer) composer.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("forum-compose-title")?.focus({ preventScroll: true });
       });
       return;
     }
@@ -1160,7 +1165,7 @@ export default function Forum() {
     // while still locking body scroll. Desktop edits use the sidebar composer.
     if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
       requestAnimationFrame(() => {
-        document.getElementById("forum-compose-sidebar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        (document.getElementById("forum-compose-card") || document.getElementById("forum-compose-sidebar"))?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
       return;
     }
@@ -1361,6 +1366,16 @@ export default function Forum() {
               <p className="mt-3 hidden max-w-md text-sm leading-6 text-muted-foreground/60 sm:mt-4 sm:block sm:leading-relaxed">
                 Connect with fellow Rugby League fans heading to Las Vegas. Share tips, plan meetups, and get the inside word on the takeover.
               </p>
+              {/* The primary action of the page, up where people look first.
+                  Fans kept asking how to post because the only compose
+                  entry points were a sidebar card and an outlined tile. */}
+              <Button
+                type="button"
+                onClick={openDiscussionComposer}
+                className="mt-4 h-12 w-full rounded-none bg-primary px-6 text-xs font-extrabold uppercase tracking-[0.2em] text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 sm:mt-6 sm:w-auto"
+              >
+                <Plus className="h-4 w-4" /> New post
+              </Button>
             </motion.div>
 
             {/* Stats Bar */}
@@ -1788,9 +1803,9 @@ export default function Forum() {
               <button
                 type="button"
                 onClick={() => setShowMobileCompose(true)}
-                className="w-full flex items-center justify-center gap-2 border border-dashed border-primary/40 bg-primary/5 py-3.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/10 transition-colors lg:hidden mb-4 cursor-pointer"
+                className="w-full flex min-h-12 items-center justify-center gap-2 bg-primary py-3.5 text-xs font-extrabold uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors lg:hidden mb-4 cursor-pointer"
               >
-                <MessageSquare className="h-4 w-4" /> Start a New Discussion
+                <Plus className="h-4 w-4" /> New post
               </button>
 
               {/* Thread Feed */}
@@ -1991,7 +2006,7 @@ export default function Forum() {
               <div className="p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h2 id="forum-mobile-compose-title" className="font-display text-lg uppercase tracking-wide">
-                    {editTarget ? "Edit Discussion" : "Start a Discussion"}
+                    {editTarget ? "Edit Discussion" : "New Post"}
                   </h2>
                   <button
                     type="button"

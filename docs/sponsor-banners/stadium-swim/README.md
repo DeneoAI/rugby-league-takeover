@@ -6,8 +6,10 @@ Banner Top creatives for the Rugby League Takeover pool party at Stadium Swim
 Stadium Swim's own artwork was a square 940×788 social flyer
 (`source-flyer-940x788.jpg`). The banner slot only shows 8:1 (desktop) and
 3.2:1 (mobile) creatives without letterboxing, so these were rebuilt from the
-flyer's own pieces: the crest over the pool photo, the date/time, key copy and
-the Stadium Swim mark.
+flyer's copy plus Stadium Swim's venue photo (`venue.jpg`, the 143 ft screen
+over the pool deck) and their official logo (`ss-logo.png`, recoloured from the
+black-background original onto white). The crest is `public/icons/icon-512.png`
+with its background removed (`crest.png`).
 
 | File | Size | Admin settings |
 | --- | --- | --- |
@@ -17,5 +19,5 @@ the Stadium Swim mark.
 ## Rebuilding
 
 `desktop.html` / `mobile.html` are the sources (pixel-exact at 2x, Oswald from
-Google Fonts). `pool.png` and `swim.png` are crops of the flyer. Open either
+Google Fonts). Open either
 page in Chromium and screenshot the `#banner` element at device scale 1.

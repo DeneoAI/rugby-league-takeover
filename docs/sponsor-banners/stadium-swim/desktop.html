@@ -3,28 +3,32 @@
 <link rel=stylesheet href=common.css>
 <style>
 .b{width:1456px;height:180px}
-/* flyer top scaled 0.4675 so the crest is 133px tall with 24px clear top+bottom */
-.pool{width:439px;height:201px;background-size:439px 201px;top:-26px;left:-120px;
- -webkit-mask-image:linear-gradient(90deg,#000 64%,transparent 98%);mask-image:linear-gradient(90deg,#000 64%,transparent 98%)}
+.crest{position:absolute;left:28px;top:16px;height:148px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+/* venue photo scaled 0.55: big screen + pool deck, faded into the navy both sides */
+.photo{position:absolute;left:175px;top:0;width:395px;height:180px;background:url(venue.jpg) no-repeat;background-size:540px 338px;background-position:-80px -36px;
+ -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 84%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 84%,transparent 100%)}
+.cap{position:absolute;left:175px;width:395px;bottom:22px;text-align:center}
+.cap span{display:inline-block;background:rgba(3,27,61,.82);border-left:4px solid #dc0117;padding:3px 12px 4px;font-size:26px;font-weight:600;text-transform:uppercase;line-height:1;white-space:nowrap}
 .redline{height:6px}
-.mid{position:absolute;left:280px;width:640px;top:22px;height:130px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-.mid .date{font-size:42px}
-.mid .det{font-size:28px}
-.mid .rule{width:78%;height:3px;background:#dc0117;margin:5px 0 6px}
-.mid .l2{margin-top:9px}
-.right{position:absolute;right:24px;top:24px;height:126px;width:500px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px}
-.right .bar{font-size:26px;padding:6px 14px 7px}
-.swim{position:static;width:140px;height:56px}
+.mid{position:absolute;left:575px;width:620px;top:22px;height:132px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.mid .date{font-size:40px}
+.mid .det{font-size:28px;margin-top:5px}
+.mid .rule{width:80%;height:3px;background:#dc0117;margin:4px 0 7px}
+.mid .bar{font-size:26px;padding:5px 14px 6px}
+.ss{position:absolute;right:24px;top:36px;width:216px;height:102px;background:#fff;display:flex;align-items:center;justify-content:center}
+.ss img{width:186px}
 </style></head><body>
 <div class="b" id=banner>
  <div class=dots></div>
- <div class=pool></div>
+ <div class=photo></div>
+ <div class=cap><span>143 Foot Screen &amp; Live DJ</span></div>
+ <img class=crest src=crest.png alt="">
  <div class=mid>
   <span class=date>Thursday, Feb 25 &nbsp;|&nbsp; 1PM – 4PM</span>
-  <span class="det l2"><b style="font-weight:600;color:#fff">Open Bar</b> &nbsp;|&nbsp; Beer · Seltzers · Wine · Select Spirits</span>
+  <span class=det><b style="font-weight:600;color:#fff">Open Bar</b> &nbsp;|&nbsp; Beer · Seltzers · Wine · Select Spirits</span>
   <span class=rule></span>
-  <span class=det>143 Foot Screen &amp; Live DJ</span>
+  <span class=bar>The Ultimate Rugby League Pool Party</span>
  </div>
- <div class=right><span class=bar>The Ultimate Rugby League Pool Party</span><div class=swim></div></div>
+ <div class=ss><img src=ss-logo.png alt=""></div>
  <div class=redline></div>
 </div></body></html>

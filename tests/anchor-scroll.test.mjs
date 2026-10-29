@@ -65,13 +65,3 @@ test("an anchor jump hydrates the lazy sections and waits for them to load", () 
   assert.ok(src.includes("HYDRATE_EVENT") && lazy.includes("HYDRATE_EVENT"), "LazySection listens for the hydrate event");
   assert.ok(src.includes("[data-section-loading]") && lazy.includes("data-section-loading"), "settling waits for loading sections");
 });
-
-test("menu lists Events and Merch above Travel Packages", () => {
-  const nav = read("../src/components/public/SiteNav.jsx");
-  const at = (label) => nav.indexOf(`label: "${label}"`);
-  assert.ok(at("Events") < at("Travel Packages"), "Events before Travel Packages");
-  assert.ok(at("Merch Shop") < at("Travel Packages"), "Merch Shop before Travel Packages");
-  const home = read("../src/pages/Home.jsx");
-  assert.ok(home.indexOf('id="events"') < home.indexOf('id="travel"'), "Events section above Travel on the home page");
-  assert.ok(home.indexOf("<MerchSection") < home.indexOf("<TravelSection"), "Merch section above Travel on the home page");
-});

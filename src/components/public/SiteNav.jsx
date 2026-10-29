@@ -15,9 +15,9 @@ const links = [
   { label: "Home", href: "/" },
   { label: "Latest News", href: "/news" },
   { label: "About Us", href: "/#about" },
+  { label: "Travel Packages", href: "/#travel" },
   { label: "Events", href: "/#events" },
   { label: "Merch Shop", href: "/store" },
-  { label: "Travel Packages", href: "/#travel" },
   { label: "Fan Forum", href: "/forum" },
   { label: "FAQs", href: "/faq" },
   { label: "Gallery", href: "/gallery" }

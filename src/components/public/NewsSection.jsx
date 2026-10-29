@@ -11,7 +11,6 @@ import SectionHeader from "./SectionHeader";
 import PublicDetailSheet from "./PublicDetailSheet";
 import FeaturedNewsCard from "./FeaturedNewsCard";
 import { scrollToAnchor } from "@/lib/scroll-to-anchor";
-import { openExternalUrl } from "@/lib/native/open-external";
 import { plainExcerpt } from "@/lib/markdown";
 
 /* ── Reading time estimator ── */
@@ -150,14 +149,7 @@ export default function NewsSection({ articles = [], settings = {} }) {
   const containerRef = useRef(null);
   const [selectedArticle, setSelectedArticle] = useState(null);
 
-  // An article can carry its own button (admin "Button text" / "Button link");
-  // otherwise it falls back to the travel-interest registration.
-  const articleCtaUrl = selectedArticle?.cta_url?.trim();
   const handleCtaClick = () => {
-    if (articleCtaUrl) {
-      openExternalUrl(articleCtaUrl);
-      return;
-    }
     scrollToAnchor("#travel");
   };
 
@@ -228,7 +220,7 @@ export default function NewsSection({ articles = [], settings = {} }) {
         image={selectedArticle?.image_url}
         body={selectedArticle?.body}
         readingTime={selectedArticle ? readingTime(selectedArticle.body) : undefined}
-        ctaLabel={selectedArticle?.cta_label?.trim() || (articleCtaUrl ? "Book Now" : "Register Vegas Travel Interest")}
+        ctaLabel="Register Vegas Travel Interest"
         onCtaClick={handleCtaClick}
       />
     </section>

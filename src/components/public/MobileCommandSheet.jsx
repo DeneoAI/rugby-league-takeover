@@ -40,17 +40,6 @@ function HomeContent({ onNavigate, onClose, settings = {} }) {
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-2 gap-3">
         <button
-          onClick={() => { onNavigate("#travel"); onClose(); }}
-          className="flex flex-col items-start p-4 border border-border/60 bg-muted/10 text-left hover:border-primary/40 hover:bg-muted/20 transition-all group cursor-pointer"
-        >
-          <div className="p-2 border border-border bg-background/50 text-primary group-hover:border-primary/30">
-            <Plane className="h-5 w-5" />
-          </div>
-          <span className="mt-3 text-xs font-bold uppercase tracking-wider text-foreground">Travel Packages</span>
-          <span className="text-[9.5px] text-muted-foreground mt-1">Register for flight &amp; hotel details</span>
-        </button>
-
-        <button
           onClick={() => { onNavigate("#events"); onClose(); }}
           className="flex flex-col items-start p-4 border border-border/60 bg-muted/10 text-left hover:border-primary/40 hover:bg-muted/20 transition-all group cursor-pointer"
         >
@@ -59,6 +48,17 @@ function HomeContent({ onNavigate, onClose, settings = {} }) {
           </div>
           <span className="mt-3 text-xs font-bold uppercase tracking-wider text-foreground">Events</span>
           <span className="text-[9.5px] text-muted-foreground mt-1">Pool parties &amp; meetups schedule</span>
+        </button>
+
+        <button
+          onClick={() => { onNavigate("#travel"); onClose(); }}
+          className="flex flex-col items-start p-4 border border-border/60 bg-muted/10 text-left hover:border-primary/40 hover:bg-muted/20 transition-all group cursor-pointer"
+        >
+          <div className="p-2 border border-border bg-background/50 text-primary group-hover:border-primary/30">
+            <Plane className="h-5 w-5" />
+          </div>
+          <span className="mt-3 text-xs font-bold uppercase tracking-wider text-foreground">Travel Packages</span>
+          <span className="text-[9.5px] text-muted-foreground mt-1">Register for flight &amp; hotel details</span>
         </button>
       </div>
 

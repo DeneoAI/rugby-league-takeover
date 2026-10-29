@@ -352,22 +352,6 @@ export default function Home() {
           <MatchupsSection />
         </motion.div>
 
-        {/* Travel Interest / Registration */}
-        <motion.div
-          id="travel"
-          style={{ scrollMarginTop: "80px" }}
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          <LazySection height={500}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
-              <TravelSection packages={visiblePackages} settings={settings} />
-            </Suspense>
-          </LazySection>
-        </motion.div>
-
         {/* Match Day Events */}
         <motion.div
           id="events"
@@ -378,7 +362,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={500}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
               <EventsSection events={events.length ? events : [defaultEvent]} event={event} />
             </Suspense>
           </LazySection>
@@ -404,8 +388,24 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={450}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
               <MerchSection settings={settings} />
+            </Suspense>
+          </LazySection>
+        </motion.div>
+
+        {/* Travel Interest / Registration */}
+        <motion.div
+          id="travel"
+          style={{ scrollMarginTop: "80px" }}
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <LazySection height={500}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
+              <TravelSection packages={visiblePackages} settings={settings} />
             </Suspense>
           </LazySection>
         </motion.div>
@@ -418,7 +418,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={450}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
               <NewsSection articles={visibleNews} settings={settings} />
             </Suspense>
           </LazySection>
@@ -434,7 +434,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={350}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[350px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[350px]" />}>
               <AboutSection settings={settings} />
             </Suspense>
           </LazySection>
@@ -462,7 +462,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={250}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-64" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-64" />}>
               <PartnersSection settings={settings} />
             </Suspense>
           </LazySection>
@@ -478,7 +478,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={350}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[350px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[350px]" />}>
               <TestimonialsSection settings={settings} />
             </Suspense>
           </LazySection>
@@ -495,8 +495,8 @@ export default function Home() {
                       { label: "Latest News", href: "/news" },
                       { label: "FAQs", href: "/faq" },
                       { label: "About Us", href: "/#about" },
-                      { label: "Travel Packages", href: "/#travel" },
                       { label: "Events", href: "/#events" },
+                      { label: "Travel Packages", href: "/#travel" },
                     ].map((link) => (
                       <li key={link.label}><a href={link.href} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">{link.label}</a></li>
                     ))}

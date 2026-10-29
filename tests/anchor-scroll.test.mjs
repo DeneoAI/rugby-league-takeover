@@ -47,3 +47,28 @@ test("home section anchors are unique (no duplicate #about)", () => {
   assert.ok(/id="about"/.test(home), "home wrapper owns the #about anchor");
   assert.ok(!/id="about"/.test(about), "AboutSection must not duplicate the #about id");
 });
+
+test("the jump is instant even though <html> has scroll-behavior: smooth", () => {
+  // A bare window.scrollTo(x, y) inherits the CSS smooth behaviour and animates
+  // through the lazy sections — About Us landed on News/Merch because of it.
+  const src = read("../src/lib/scroll-to-anchor.js");
+  assert.ok(src.includes('behavior: "instant"'), "jumps with behavior: instant");
+  assert.ok(!/window\.scrollTo\(0,/.test(src), "no bare scrollTo(x, y) that would animate");
+});
+
+test("an anchor jump hydrates the lazy sections and waits for them to load", () => {
+  const src = read("../src/lib/scroll-to-anchor.js");
+  const lazy = read("../src/components/public/LazySection.jsx");
+  assert.ok(src.includes("HYDRATE_EVENT") && lazy.includes("HYDRATE_EVENT"), "LazySection listens for the hydrate event");
+  assert.ok(src.includes("[data-section-loading]") && lazy.includes("data-section-loading"), "settling waits for loading sections");
+});
+
+test("menu lists Events and Merch above Travel Packages", () => {
+  const nav = read("../src/components/public/SiteNav.jsx");
+  const at = (label) => nav.indexOf(`label: "${label}"`);
+  assert.ok(at("Events") < at("Travel Packages"), "Events before Travel Packages");
+  assert.ok(at("Merch Shop") < at("Travel Packages"), "Merch Shop before Travel Packages");
+  const home = read("../src/pages/Home.jsx");
+  assert.ok(home.indexOf('id="events"') < home.indexOf('id="travel"'), "Events section above Travel on the home page");
+  assert.ok(home.indexOf("<MerchSection") < home.indexOf("<TravelSection"), "Merch section above Travel on the home page");
+});

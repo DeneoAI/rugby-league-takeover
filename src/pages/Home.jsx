@@ -352,18 +352,32 @@ export default function Home() {
           <MatchupsSection />
         </motion.div>
 
-        {/* Travel Interest / Registration */}
+        {/* News Section */}
         <motion.div
-          id="travel"
-          style={{ scrollMarginTop: "80px" }}
           initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <LazySection height={450}>
+            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
+              <NewsSection articles={visibleNews} settings={settings} />
+            </Suspense>
+          </LazySection>
+        </motion.div>
+
+        {/* Match Day Events */}
+        <motion.div
+          id="events"
+          style={{ scrollMarginTop: "80px" }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={500}>
             <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
-              <TravelSection packages={visiblePackages} settings={settings} />
+              <EventsSection events={events.length ? events : [defaultEvent]} event={event} />
             </Suspense>
           </LazySection>
         </motion.div>
@@ -394,32 +408,18 @@ export default function Home() {
           </LazySection>
         </motion.div>
 
-        {/* News Section */}
+        {/* Travel Interest / Registration */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          <LazySection height={450}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
-              <NewsSection articles={visibleNews} settings={settings} />
-            </Suspense>
-          </LazySection>
-        </motion.div>
-
-        {/* Match Day Events */}
-        <motion.div
-          id="events"
+          id="travel"
           style={{ scrollMarginTop: "80px" }}
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={500}>
             <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
-              <EventsSection events={events.length ? events : [defaultEvent]} event={event} />
+              <TravelSection packages={visiblePackages} settings={settings} />
             </Suspense>
           </LazySection>
         </motion.div>

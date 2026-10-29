@@ -7,8 +7,9 @@ Stadium Swim's own artwork was a square 940×788 social flyer
 (`source-flyer-940x788.jpg`). The banner slot only shows 8:1 (desktop) and
 3.2:1 (mobile) creatives without letterboxing, so these were rebuilt from the
 flyer's copy plus Stadium Swim's venue photo (`venue.jpg`, the 143 ft screen
-over the pool deck) and their official logo (`ss-logo.png`, recoloured from the
-black-background original onto white). The crest is `public/icons/icon-512.png`
+over the pool deck) and their official logo. The logo is cut out to transparent (`ss-logo-clear.png`,
+made from `ss-logo-original.jpg` by `cut-logo.py`): outline and STADIUM in
+white, SWIM in its light blue, no fills. The crest is `public/icons/icon-512.png`
 with its background removed (`crest.png`).
 
 | File | Size | Admin settings |

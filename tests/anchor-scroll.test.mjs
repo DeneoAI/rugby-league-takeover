@@ -52,8 +52,11 @@ test("the jump is instant even though <html> has scroll-behavior: smooth", () =>
   // A bare window.scrollTo(x, y) inherits the CSS smooth behaviour and animates
   // through the lazy sections — About Us landed on News/Merch because of it.
   const src = read("../src/lib/scroll-to-anchor.js");
-  assert.ok(src.includes('behavior: "instant"'), "jumps with behavior: instant");
-  assert.ok(!/window\.scrollTo\(0,/.test(src), "no bare scrollTo(x, y) that would animate");
+  assert.ok(src.includes('scrollBehavior = "auto"'), "switches the smooth rule off for the jump");
+  assert.ok(!src.includes('behavior: "instant"'), "avoids behavior: instant (TypeError on older iOS Safari)");
+  // The drawer's scroll-restore must not glide from the top either.
+  const nav = read("../src/components/public/SiteNav.jsx");
+  assert.ok(nav.includes("jumpTo(scrollYRef.current)"), "menu close restores the scroll instantly");
 });
 
 test("an anchor jump hydrates the lazy sections and waits for them to load", () => {

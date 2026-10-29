@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AnimatePresence, motion } from "framer-motion";
-import { scrollToAnchor } from "@/lib/scroll-to-anchor";
+import { jumpTo, scrollToAnchor } from "@/lib/scroll-to-anchor";
 
 const logoUrl = "/icons/icon-192.png";
 const NotificationBell = lazy(() => import("@/components/NotificationBell"));
@@ -167,7 +167,7 @@ export default function SiteNav({ settings = {}, settingsLoading = false }) {
     if (wasDrawerOpenRef.current) {
       wasDrawerOpenRef.current = false;
       unlockBody();
-      window.scrollTo(0, scrollYRef.current);
+      jumpTo(scrollYRef.current); // instant, not a glide from the top
     }
 
     return undefined;

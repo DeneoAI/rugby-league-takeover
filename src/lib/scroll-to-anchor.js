@@ -42,8 +42,15 @@ const LOADING_SELECTOR = "[data-section-loading]";
 // index.css sets `scroll-behavior: smooth` on <html>, which turns a bare
 // window.scrollTo(x, y) into an animation — the very fly-through this helper
 // exists to avoid (it was still sending About Us to News/Merch). Always jump.
-function jumpTo(top) {
-  window.scrollTo({ top, left: 0, behavior: "instant" });
+// The smooth rule is switched off for the one call rather than passing
+// an "instant" scroll behaviour option, which older iOS Safari rejects with a
+// TypeError.
+export function jumpTo(top) {
+  const root = document.documentElement;
+  const previous = root.style.scrollBehavior;
+  root.style.scrollBehavior = "auto";
+  window.scrollTo(0, top);
+  root.style.scrollBehavior = previous;
 }
 
 export function scrollToAnchor(hash, { offset = DEFAULT_OFFSET, prescroll = null, updateHistory = true } = {}) {

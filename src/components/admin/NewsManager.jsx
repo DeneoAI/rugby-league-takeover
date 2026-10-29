@@ -13,7 +13,21 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import ImageField from "./ImageField";
 
-const emptyArticle = { title: "", body: "", image_url: "", published_date: new Date().toISOString().slice(0, 10), author: "RLT Vegas", is_published: true };
+const emptyArticle = { title: "", body: "", image_url: "", published_date: new Date().toISOString().slice(0, 10), author: "RLT Vegas", is_published: true, cta_label: "", cta_url: "" };
+
+// The button columns arrive with migration 0040. Only send them when they are
+// set, or when the row already has them (so they can be cleared) — that way
+// saving an article keeps working on a database without the migration yet.
+function withCta(data, existing = {}) {
+  const out = { ...data };
+  for (const key of ["cta_label", "cta_url"]) {
+    const value = (out[key] || "").trim();
+    if (value) out[key] = value;
+    else if (key in existing) out[key] = null;
+    else delete out[key];
+  }
+  return out;
+}
 
 /* ─── Inline label wrapper ──────────────────────────────── */
 function FieldLabel({ label, children, className = "" }) {
@@ -36,10 +50,12 @@ function EditForm({ article, updateMutation, onClose }) {
     is_published: article.is_published !== false,
     image_url: article.image_url || "",
     body: article.body || "",
+    cta_label: article.cta_label || "",
+    cta_url: article.cta_url || "",
   });
 
   const handleSave = () => {
-    updateMutation.mutate({ id: article.id, data: editDraft }, {
+    updateMutation.mutate({ id: article.id, data: withCta(editDraft, article) }, {
       onSuccess: () => onClose(),
     });
   };
@@ -85,6 +101,12 @@ function EditForm({ article, updateMutation, onClose }) {
         <ImageField label="Article image" value={editDraft.image_url} onChange={(url) => setEditDraft({ ...editDraft, image_url: url })} className="md:col-span-2" />
         <FieldLabel label="Article Body" className="md:col-span-2">
           <RichTextField value={editDraft.body} onChange={(body) => setEditDraft({ ...editDraft, body })} minHeight="min-h-40" />
+        </FieldLabel>
+        <FieldLabel label="Button text (optional)">
+          <Input placeholder="Register Vegas Travel Interest" value={editDraft.cta_label} onChange={(e) => setEditDraft({ ...editDraft, cta_label: e.target.value })} className="h-11 rounded-none" />
+        </FieldLabel>
+        <FieldLabel label="Button link (optional)">
+          <Input placeholder="https://… (blank = travel registration)" value={editDraft.cta_url} onChange={(e) => setEditDraft({ ...editDraft, cta_url: e.target.value })} className="h-11 rounded-none" />
         </FieldLabel>
         <div className="md:col-span-2 flex justify-end">
           <Button
@@ -390,10 +412,16 @@ export default function NewsManager({ articles }) {
                   <FieldLabel label="Article Body" className="md:col-span-2">
                     <RichTextField value={draft.body} onChange={(body) => setDraft({ ...draft, body })} placeholder="Write the article body…" minHeight="min-h-48" />
                   </FieldLabel>
+                  <FieldLabel label="Button text (optional)">
+                    <Input placeholder="Register Vegas Travel Interest" value={draft.cta_label} onChange={(e) => setDraft({ ...draft, cta_label: e.target.value })} className="h-11 rounded-none" />
+                  </FieldLabel>
+                  <FieldLabel label="Button link (optional)">
+                    <Input placeholder="https://… (blank = travel registration)" value={draft.cta_url} onChange={(e) => setDraft({ ...draft, cta_url: e.target.value })} className="h-11 rounded-none" />
+                  </FieldLabel>
                   <div className="md:col-span-2">
                     <Button
                       size="mobile"
-                      onClick={() => createMutation.mutate(draft)}
+                      onClick={() => createMutation.mutate(withCta(draft))}
                       disabled={!draft.title || createMutation.isPending}
                       className="rounded-none bg-primary hover:bg-primary/90 w-full sm:w-auto"
                     >

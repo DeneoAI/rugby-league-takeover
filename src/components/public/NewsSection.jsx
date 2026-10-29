@@ -13,6 +13,10 @@ import FeaturedNewsCard from "./FeaturedNewsCard";
 import { scrollToAnchor } from "@/lib/scroll-to-anchor";
 import { plainExcerpt } from "@/lib/markdown";
 
+/* ── Stadium Swim articles link straight to the Circa booking page ── */
+const STADIUM_SWIM_BOOKING_URL = "https://www.circalasvegas.com/event/EVE53555600120270225/rugby-league-takeover/";
+const isStadiumSwimArticle = (article) => /stadium\s*swim/i.test(article?.title || "");
+
 /* ── Reading time estimator ── */
 const readingTime = (text) => {
   if (!text) return "1 min";
@@ -149,7 +153,13 @@ export default function NewsSection({ articles = [], settings = {} }) {
   const containerRef = useRef(null);
   const [selectedArticle, setSelectedArticle] = useState(null);
 
+  const isStadiumSwim = isStadiumSwimArticle(selectedArticle);
+
   const handleCtaClick = () => {
+    if (isStadiumSwim) {
+      window.open(STADIUM_SWIM_BOOKING_URL, "_blank", "noopener,noreferrer");
+      return;
+    }
     scrollToAnchor("#travel");
   };
 
@@ -220,7 +230,7 @@ export default function NewsSection({ articles = [], settings = {} }) {
         image={selectedArticle?.image_url}
         body={selectedArticle?.body}
         readingTime={selectedArticle ? readingTime(selectedArticle.body) : undefined}
-        ctaLabel="Register Vegas Travel Interest"
+        ctaLabel={isStadiumSwim ? "Book now" : "Register Vegas Travel Interest"}
         onCtaClick={handleCtaClick}
       />
     </section>

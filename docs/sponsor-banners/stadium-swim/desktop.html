@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset=utf-8>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel=stylesheet>
+<link rel=stylesheet href=common.css>
+<style>
+.b{width:1456px;height:180px}
+.crest{position:absolute;left:28px;top:16px;height:148px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+/* venue photo scaled 0.55: big screen + pool deck, faded into the navy both sides */
+.photo{position:absolute;left:175px;top:0;width:395px;height:180px;background:url(venue.jpg) no-repeat;background-size:540px 338px;background-position:-80px -36px;
+ -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 84%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 84%,transparent 100%)}
+.cap{position:absolute;left:175px;width:395px;bottom:22px;text-align:center}
+.cap span{display:inline-block;background:rgba(3,27,61,.82);border-left:4px solid #dc0117;padding:3px 12px 4px;font-size:26px;font-weight:600;text-transform:uppercase;line-height:1;white-space:nowrap}
+.redline{height:6px}
+.mid{position:absolute;left:575px;width:620px;top:22px;height:132px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.mid .date{font-size:40px}
+.mid .det{font-size:28px;margin-top:5px}
+.mid .rule{width:80%;height:3px;background:#dc0117;margin:4px 0 7px}
+.mid .bar{font-size:26px;padding:5px 14px 6px}
+.ss{position:absolute;right:24px;top:24px;width:216px;height:132px;display:flex;align-items:center;justify-content:center}
+.ss img{width:206px}
+</style></head><body>
+<div class="b" id=banner>
+ <div class=dots></div>
+ <div class=photo></div>
+ <div class=cap><span>143 Foot Screen &amp; Live DJ</span></div>
+ <img class=crest src=crest.png alt="">
+ <div class=mid>
+  <span class=date>Thursday, Feb 25 &nbsp;|&nbsp; 1PM – 4PM</span>
+  <span class=det><b style="font-weight:600;color:#fff">Open Bar</b> &nbsp;|&nbsp; Beer · Seltzers · Wine · Select Spirits</span>
+  <span class=rule></span>
+  <span class=bar>The Ultimate Rugby League Pool Party</span>
+ </div>
+ <div class=ss><img src=ss-logo-clear.png alt=""></div>
+ <div class=redline></div>
+</div></body></html>

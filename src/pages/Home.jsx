@@ -360,7 +360,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={450}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
               <NewsSection articles={visibleNews} settings={settings} />
             </Suspense>
           </LazySection>
@@ -376,7 +376,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={500}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
               <EventsSection events={events.length ? events : [defaultEvent]} event={event} />
             </Suspense>
           </LazySection>
@@ -402,7 +402,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={450}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
               <MerchSection settings={settings} />
             </Suspense>
           </LazySection>
@@ -418,7 +418,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={500}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
               <TravelSection packages={visiblePackages} settings={settings} />
             </Suspense>
           </LazySection>
@@ -434,7 +434,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={350}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[350px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[350px]" />}>
               <AboutSection settings={settings} />
             </Suspense>
           </LazySection>
@@ -462,7 +462,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={250}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-64" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-64" />}>
               <PartnersSection settings={settings} />
             </Suspense>
           </LazySection>
@@ -478,7 +478,7 @@ export default function Home() {
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
           <LazySection height={350}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[350px]" />}>
+            <Suspense fallback={<div data-section-loading="" className="animate-pulse bg-muted/5 border-y border-border/20 h-[350px]" />}>
               <TestimonialsSection settings={settings} />
             </Suspense>
           </LazySection>

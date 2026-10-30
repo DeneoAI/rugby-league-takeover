@@ -108,8 +108,11 @@ export default function PublicLayout() {
           aspect-ratio/min-height, so padding there is subtracted from the
           reserved box instead of added around it. With pt-[4.5rem] on the slot
           a 728×90 leaderboard rendered 696×86 starting 72px down and spilled
-          68px past the bottom border, over the top of the page content. */}
-      <div className="empty:hidden w-full border-b border-border/30 px-4 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] pb-4">
+          68px past the bottom border, over the top of the page content.
+          `relative z-10` lifts it above the home page's fixed BackgroundVideo
+          layer (z-0): unpositioned, the banner painted underneath it and was
+          invisible even when an ad loaded. */}
+      <div className="empty:hidden relative z-10 w-full border-b border-border/30 px-4 pt-[calc(5rem+env(safe-area-inset-top,0px))] pb-4">
         <AdSlot
           position="banner-top"
           size="banner"

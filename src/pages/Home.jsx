@@ -352,18 +352,16 @@ export default function Home() {
           <MatchupsSection />
         </motion.div>
 
-        {/* Travel Interest / Registration */}
+        {/* News Section */}
         <motion.div
-          id="travel"
-          style={{ scrollMarginTop: "80px" }}
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <LazySection height={500}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
-              <TravelSection packages={visiblePackages} settings={settings} />
+          <LazySection height={450}>
+            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
+              <NewsSection articles={visibleNews} settings={settings} />
             </Suspense>
           </LazySection>
         </motion.div>
@@ -410,16 +408,18 @@ export default function Home() {
           </LazySection>
         </motion.div>
 
-        {/* News Section */}
+        {/* Travel Interest / Registration */}
         <motion.div
+          id="travel"
+          style={{ scrollMarginTop: "80px" }}
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <LazySection height={450}>
-            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[450px]" />}>
-              <NewsSection articles={visibleNews} settings={settings} />
+          <LazySection height={500}>
+            <Suspense fallback={<div className="animate-pulse bg-muted/5 border-y border-border/20 h-[500px]" />}>
+              <TravelSection packages={visiblePackages} settings={settings} />
             </Suspense>
           </LazySection>
         </motion.div>
@@ -493,10 +493,10 @@ export default function Home() {
                   <ul className="space-y-2">
                     {[
                       { label: "Latest News", href: "/news" },
+                      { label: "Events", href: "/#events" },
                       { label: "FAQs", href: "/faq" },
                       { label: "About Us", href: "/#about" },
                       { label: "Travel Packages", href: "/#travel" },
-                      { label: "Events", href: "/#events" },
                     ].map((link) => (
                       <li key={link.label}><a href={link.href} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">{link.label}</a></li>
                     ))}

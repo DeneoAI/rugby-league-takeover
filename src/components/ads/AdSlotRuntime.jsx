@@ -205,7 +205,7 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
   const viewabilityTimerRef = useRef(null);
 
   /* ── Fetch all ads ── */
-  const { data: allAds = [] } = useQuery({
+  const { data: allAds = [], isFetched: adsFetched } = useQuery({
     queryKey: ["siteAds"],
     queryFn: () => base44.entities.SiteAd.list("-created_date", 200),
     staleTime: 30000,
@@ -231,16 +231,24 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
     return () => { mountedRef.current = false; };
   }, []);
 
-  /* ── Sync status with parent for visibility toggling ── */
+  /* ── Sync status with parent for visibility toggling ──
+     Reporting "no ad" makes the parent AdSlot render nothing, which unmounts
+     this runtime for good. So only say so once the ads query has answered,
+     and judge from the fetched list directly: `ads` state is still [] on the
+     first render and on the render the data arrives in (resolve() fills it a
+     beat later), and reporting that collapsed every slot before its ad loaded. */
+  const hasCandidate = allAds.some(
+    (a) => a.position === position && isAdScheduleActive(a) && matchesDevice(a)
+  );
   useEffect(() => {
     setEnabled(globalEnabled);
     if (onAdsLoadState) {
       onAdsLoadState({
         enabled: globalEnabled,
-        hasAd: ads.length > 0 || isAdmin
+        hasAd: !adsFetched || hasCandidate || isAdmin
       });
     }
-  }, [globalEnabled, ads, isAdmin, onAdsLoadState]);
+  }, [globalEnabled, adsFetched, hasCandidate, isAdmin, onAdsLoadState]);
 
   /* ── Filter candidates for this slot ── */
   const resolve = useCallback(() => {

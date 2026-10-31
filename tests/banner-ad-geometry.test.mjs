@@ -21,8 +21,24 @@ test("banner slots keep their padding on the wrapper, not on the slot", () => {
   // overflows the slot and paints over the page content beneath it.
   assert.doesNotMatch(slot, /\b(pt-|pb-|py-)/, "banner-top slot must carry no vertical padding");
 
-  // Nav clearance still has to exist — it just belongs on the wrapper.
-  assert.match(layout, /border-b border-border\/30[^"]*pt-\[calc\(4\.5rem\+env\(safe-area-inset-top,0px\)\)\]/);
+  // Nav clearance still has to exist — it just belongs on the wrapper. The
+  // fixed header is 80px (5rem); 4.5rem tucked the banner's top 8px under it.
+  assert.match(layout, /border-b border-border\/30[^"]*pt-\[calc\(5rem\+env\(safe-area-inset-top,0px\)\)\]/);
+});
+
+test("the top banner paints above the fixed background video layer", () => {
+  // BackgroundVideo is `fixed inset-0 z-0`; an unpositioned banner wrapper is
+  // painted underneath it, so a loaded ad was invisible on Home/Store/Gallery.
+  const layout = code("../src/components/public/PublicLayout.jsx");
+  assert.match(layout, /empty:hidden relative z-10 w-full border-b/);
+});
+
+test("a slot only collapses after the ads query has answered", () => {
+  // Reporting hasAd:false unmounts the runtime for good, so it must not be
+  // reported from the empty first render, before the ads have loaded.
+  const runtime = code("../src/components/ads/AdSlotRuntime.jsx");
+  assert.match(runtime, /isFetched: adsFetched/);
+  assert.match(runtime, /hasAd: !adsFetched \|\| hasCandidate \|\| isAdmin/);
 });
 
 test("full-width banner strips use the banner fallback chain", () => {

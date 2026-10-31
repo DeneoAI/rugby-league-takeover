@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
+import { isActiveMember } from "@/lib/membership";
 
 const FanHubTab = lazy(() => import("@/components/account/FanHubTab"));
 const MembershipTab = lazy(() => import("@/components/account/MembershipTab"));
@@ -33,6 +34,7 @@ const OrdersTab = lazy(() => import("@/components/account/OrdersTab"));
 const PostsTab = lazy(() => import("@/components/account/PostsTab"));
 const InterestTab = lazy(() => import("@/components/account/InterestTab"));
 const SecurityTab = lazy(() => import("@/components/account/SecurityTab"));
+const MembershipCard = lazy(() => import("@/components/membership/MembershipCard"));
 
 function AccountTabFallback() {
   return (
@@ -224,6 +226,21 @@ export default function Account() {
             </div>
           </div>
         </motion.div>
+
+        {/* ── MEMBER CARD: first thing an active member sees, so the bar QR is
+             one tap from the account page instead of buried in the Membership tab ── */}
+        {isActiveMember(user) && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.04, duration: 0.5 }}
+            className="mx-auto w-full max-w-xl"
+          >
+            <Suspense fallback={<div className="h-40 animate-pulse border border-border/30 bg-card/20" />}>
+              <MembershipCard />
+            </Suspense>
+          </motion.div>
+        )}
 
         {/* ── SECTION 2: MY JOURNEY ── */}
         <motion.div

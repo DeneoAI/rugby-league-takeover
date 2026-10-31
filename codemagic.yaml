@@ -63,7 +63,10 @@ workflows:
       - name: Set a unique build number
         script: |
           set -e
-          BN="${BUILD_NUMBER:-$(date +%s)}"
+          # Codemagic's BUILD_NUMBER restarts at 1 when the app is re-added to a new
+          # Codemagic account (as happened in Oct 2026), which collides with builds
+          # already on App Store Connect. A Unix timestamp is always higher.
+          BN="$(date +%s)"
           sed -i '' -E "s/CURRENT_PROJECT_VERSION = [0-9]+;/CURRENT_PROJECT_VERSION = ${BN};/g" ios/App/App.xcodeproj/project.pbxproj
           echo "CFBundleVersion (CURRENT_PROJECT_VERSION) set to ${BN}"
       - name: Build signed IPA
@@ -122,9 +125,10 @@ workflows:
           cd android
           chmod +x gradlew
           # Play rejects an upload whose versionCode is not higher than the last
-          # one, so mirror the iOS approach: Codemagic's incrementing counter,
-          # falling back to a Unix timestamp (safely under Play's 2100000000 cap).
-          VC="${BUILD_NUMBER:-$(date +%s)}"
+          # one. Codemagic's BUILD_NUMBER restarts at 1 in a new Codemagic account
+          # (Play already has versionCode 2), so use a Unix timestamp: always
+          # increasing and safely under Play's 2100000000 cap until 2036.
+          VC="$(date +%s)"
           echo "versionCode ${VC}"
           ./gradlew bundleRelease \
             -PversionCode="${VC}" \

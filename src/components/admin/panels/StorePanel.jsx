@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Activity, Package, HelpCircle, TicketPercent } from "lucide-react";
+import { ShoppingBag, Activity, Package, HelpCircle, TicketPercent, BadgePercent, ScanLine } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import ProductsManager from "../ProductsManager";
 import OrdersManager from "../OrdersManager";
 import FaqManager from "../FaqManager";
 import PromoCodesManager from "../PromoCodesManager";
+import MembershipDiscountsManager from "../MembershipDiscountsManager";
+import BarScannerAccessManager from "../BarScannerAccessManager";
 
 export default function StorePanel() {
   const [activeTab, setActiveTab] = useState("products");
@@ -17,6 +19,8 @@ export default function StorePanel() {
   const tabs = [
     { id: "products", label: "Merch Products", icon: Package, count: products.length },
     { id: "promos", label: "Promo Codes", icon: TicketPercent, count: null },
+    { id: "member-discounts", label: "Member Perks", icon: BadgePercent, count: null },
+    { id: "bar-scanner", label: "Bar Scanner", icon: ScanLine, count: null },
     { id: "orders", label: "Orders & Shipping", icon: ShoppingBag, count: orders.length },
     { id: "faqs", label: "Store FAQs", icon: HelpCircle, count: faqs.length },
   ];
@@ -121,6 +125,30 @@ export default function StorePanel() {
               transition={{ duration: 0.18 }}
             >
               <PromoCodesManager />
+            </motion.div>
+          )}
+
+          {activeTab === "member-discounts" && (
+            <motion.div
+              key="member-discounts-tab"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+            >
+              <MembershipDiscountsManager />
+            </motion.div>
+          )}
+
+          {activeTab === "bar-scanner" && (
+            <motion.div
+              key="bar-scanner-tab"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+            >
+              <BarScannerAccessManager />
             </motion.div>
           )}
 

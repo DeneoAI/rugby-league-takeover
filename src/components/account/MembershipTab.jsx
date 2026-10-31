@@ -1,13 +1,15 @@
 import React from "react";
-import { ShieldCheck, Ticket, MessageSquare, Percent, Calendar } from "lucide-react";
+import { ShieldCheck, Ticket, MessageSquare, Calendar } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import MembershipCard from "@/components/membership/MembershipCard";
+import { PerkList, useMemberPerks } from "@/components/membership/MemberPerks";
 import {
   isActiveMember, formatMembershipDate, membershipStatusLine, MEMBERSHIP_TERM_MONTHS,
 } from "@/lib/membership";
 
+// Fixed perks of being a member. The discounts themselves are admin-managed
+// (Admin → Store → Member Perks) and listed above these.
 const BENEFITS = [
-  { icon: Percent, title: "Bar discounts", text: "Show your card at the bar for member pricing on the night." },
   { icon: ShieldCheck, title: "RLT Member badge", text: "Your posts carry the member badge across the forum." },
   { icon: Ticket, title: "Member events", text: "First access to member-only events and ticket releases." },
   { icon: MessageSquare, title: "Backing the club", text: "Every membership goes straight back into the takeover." },
@@ -16,6 +18,7 @@ const BENEFITS = [
 export default function MembershipTab() {
   const { user } = useAuth();
   const active = isActiveMember(user);
+  const { perks } = useMemberPerks();
 
   return (
     <div className="grid gap-5">
@@ -58,6 +61,12 @@ export default function MembershipTab() {
 
       <div className="border border-border/50 bg-card/20 p-5">
         <h3 className="font-display text-base uppercase tracking-wide text-foreground">What you get</h3>
+        {/* Active members already see these directly under their card. */}
+        {!active && perks.length > 0 && (
+          <div className="mt-4">
+            <PerkList perks={perks} />
+          </div>
+        )}
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {BENEFITS.map((benefit) => (
             <div key={benefit.title} className="flex items-start gap-3 border border-border/20 bg-black/20 p-3">

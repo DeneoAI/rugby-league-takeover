@@ -67,6 +67,11 @@ export default defineConfig({
           if (normalized.includes('/node_modules/@capacitor/')) {
             return undefined
           }
+          // jsQR is only loaded by the bar scanner (/scan) on browsers without
+          // BarcodeDetector. Keep it out of the preloaded vendor-misc chunk.
+          if (normalized.includes('/node_modules/jsqr/')) {
+            return undefined
+          }
           if (normalized.includes('/node_modules/react/') || normalized.includes('/node_modules/react-dom/') || normalized.includes('/node_modules/react-router-dom/') || normalized.includes('/node_modules/scheduler/') || normalized.includes('/node_modules/react-is/')) {
             return 'vendor-react'
           }

@@ -1,0 +1,53 @@
+{
+  "name": "MembershipDiscount",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "What the perk is, e.g. Bar discounts"
+    },
+    "description": {
+      "type": "string",
+      "description": "One or two lines of detail shown to members"
+    },
+    "discount_label": {
+      "type": "string",
+      "description": "Short headline value shown as a badge, e.g. 10% off"
+    },
+    "venue": {
+      "type": "string",
+      "description": "Where it applies (optional), e.g. a partner bar"
+    },
+    "how_to_redeem": {
+      "type": "string",
+      "description": "How to claim it. Public — never a secret code"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 1,
+      "description": "Display order (lower first)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether members can see it"
+    },
+    "starts_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional: hidden before this time"
+    },
+    "ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional: hidden from this time"
+    }
+  },
+  "required": ["title"],
+  "rls": {
+    "create": { "user_condition": { "role": "admin" } },
+    "read": true,
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

@@ -10,13 +10,28 @@
 // their phone is showing.
 //
 // Actions:
-//   issue  — (member, authenticated) mint a token for MY card
-//   verify — (staff: admin/moderator) check a scanned token
-import { json, preflight, serviceClient, getCaller, trimToLength } from './shared.ts';
+//   issue              — (member, authenticated) mint a token for MY card
+//   verify             — (staff: admin/moderator, OR a bar device holding a
+//                         bar_session) check a scanned token or member number
+//   bar_login          — (anyone) trade the admin-set 8-digit bar code for a
+//                         signed bar_session; throttled per IP
+//   bar_settings       — (admin) read the bar code and on/off switch
+//   bar_settings_save  — (admin) set, generate or switch off the bar code
+import { json, preflight, serviceClient, getCaller, trimToLength, resolveClientIp } from './shared.ts';
 
 // Long enough to walk from the door to the bar with a screenshot-proof margin,
 // short enough that a photographed code is useless by the time it's shared.
 const TOKEN_TTL_SECONDS = 15 * 60;
+
+// A bar device stays signed in for a full night (doors to close plus margin),
+// then has to re-enter the code. Changing the code ends it sooner.
+const BAR_SESSION_TTL_SECONDS = 16 * 60 * 60;
+
+// Guessing limits for the 8-digit code. Per IP, plus a global ceiling so a
+// spread-out attack still can't grind through the code space.
+const BAR_LOGIN_WINDOW_MINUTES = 15;
+const BAR_LOGIN_MAX_FAILURES_PER_IP = 8;
+const BAR_LOGIN_MAX_FAILURES_GLOBAL = 300;
 
 const encoder = new TextEncoder();
 
@@ -84,6 +99,73 @@ async function readToken(token: string) {
   return { payload };
 }
 
+// ── Bar scanner access ──────────────────────────────────────────────────────
+
+const isBarCode = (value: string) => /^[0-9]{8}$/.test(value);
+
+function randomBarCode() {
+  const bytes = new Uint32Array(1);
+  crypto.getRandomValues(bytes);
+  return String(bytes[0] % 100000000).padStart(8, '0');
+}
+
+// deno-lint-ignore no-explicit-any
+async function readBarAccess(svc: any) {
+  const { data, error } = await svc
+    .from('bar_scanner_access')
+    .select('access_code, enabled, code_version, updated_date')
+    .eq('id', 'default')
+    .maybeSingle();
+  if (error) throw new Error('Bar scanner is not set up yet (run migration 0040)');
+  return data || { access_code: null, enabled: false, code_version: 0, updated_date: null };
+}
+
+async function issueBarSession(codeVersion: number) {
+  const body = b64url(encoder.encode(JSON.stringify({
+    v: 1,
+    k: 'bar',
+    cv: codeVersion,
+    exp: Math.floor(Date.now() / 1000) + BAR_SESSION_TTL_SECONDS,
+  })));
+  return `${body}.${await hmac(body)}`;
+}
+
+// deno-lint-ignore no-explicit-any
+async function barSessionValid(svc: any, session: string) {
+  const [body, signature] = String(session || '').split('.');
+  if (!body || !signature) return false;
+  if (!safeEqual(signature, await hmac(body))) return false;
+  let payload;
+  try {
+    payload = JSON.parse(new TextDecoder().decode(fromB64url(body)));
+  } catch {
+    return false;
+  }
+  // k === 'bar' keeps a member card token from ever passing as a bar session.
+  if (payload?.k !== 'bar' || Number(payload.exp) * 1000 <= Date.now()) return false;
+  const access = await readBarAccess(svc);
+  return !!access.enabled && !!access.access_code && Number(payload.cv) === Number(access.code_version);
+}
+
+// Live perks to show alongside a valid card (migration 0038). Optional: if the
+// table isn't there yet the check still works, just without perks.
+// deno-lint-ignore no-explicit-any
+async function livePerks(svc: any) {
+  const nowIso = new Date().toISOString();
+  const { data, error } = await svc
+    .from('membership_discounts')
+    .select('id, title, discount_label, description, venue, how_to_redeem, sort_order, ends_at, starts_at')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true })
+    .limit(50);
+  if (error || !Array.isArray(data)) return [];
+  return data
+    .filter((row) => (!row.starts_at || row.starts_at <= nowIso) && (!row.ends_at || row.ends_at > nowIso))
+    .map(({ starts_at: _s, sort_order: _o, ...rest }) => rest);
+}
+
+const isStaffRole = (role: unknown) => role === 'admin' || role === 'moderator';
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return preflight();
   try {
@@ -91,9 +173,61 @@ Deno.serve(async (req) => {
     const input = await req.json().catch(() => ({}));
     const action = trimToLength(input?.action, 20) || 'issue';
     const me = await getCaller(req, svc);
-    if (!me) return json({ error: 'Sign in required' }, 401);
+
+    if (action === 'bar_login') {
+      const ip = resolveClientIp(req) || 'unknown';
+      const since = new Date(Date.now() - BAR_LOGIN_WINDOW_MINUTES * 60000).toISOString();
+      const [{ count: ipFailures }, { count: allFailures }] = await Promise.all([
+        svc.from('bar_scanner_attempts').select('id', { count: 'exact', head: true })
+          .eq('ip', ip).eq('succeeded', false).gte('attempted_at', since),
+        svc.from('bar_scanner_attempts').select('id', { count: 'exact', head: true })
+          .eq('succeeded', false).gte('attempted_at', since),
+      ]);
+      if ((ipFailures || 0) >= BAR_LOGIN_MAX_FAILURES_PER_IP || (allFailures || 0) >= BAR_LOGIN_MAX_FAILURES_GLOBAL) {
+        return json({ error: `Too many wrong codes. Try again in ${BAR_LOGIN_WINDOW_MINUTES} minutes.`, code: 'rate_limited' }, 429);
+      }
+      const code = trimToLength(input?.code, 20).replace(/\s+/g, '');
+      const access = await readBarAccess(svc);
+      const ok = isBarCode(code) && !!access.enabled && !!access.access_code && safeEqual(code, access.access_code);
+      await svc.from('bar_scanner_attempts').insert({ ip, succeeded: ok });
+      if (!ok) {
+        return json({
+          error: access.enabled && access.access_code
+            ? 'That code is not right. Check it with the RLT team.'
+            : 'The bar scanner is switched off right now.',
+          code: 'bad_code',
+        }, 403);
+      }
+      return json({ ok: true, session: await issueBarSession(Number(access.code_version)), expires_in: BAR_SESSION_TTL_SECONDS });
+    }
+
+    if (action === 'bar_settings' || action === 'bar_settings_save') {
+      if (me?.role !== 'admin') return json({ error: 'Admins only' }, 403);
+      if (action === 'bar_settings_save') {
+        const patch: Record<string, unknown> = { updated_by: me.id };
+        if (input?.generate === true) {
+          patch.access_code = randomBarCode();
+        } else if (input?.code !== undefined) {
+          const code = trimToLength(input.code, 20).replace(/\s+/g, '');
+          if (!isBarCode(code)) return json({ error: 'The code must be exactly 8 digits.' }, 400);
+          patch.access_code = code;
+        }
+        if (typeof input?.enabled === 'boolean') patch.enabled = input.enabled;
+        const { error } = await svc.from('bar_scanner_access')
+          .upsert({ id: 'default', ...patch }, { onConflict: 'id' });
+        if (error) throw new Error(error.message);
+      }
+      const access = await readBarAccess(svc);
+      return json({
+        ok: true,
+        code: access.access_code || '',
+        enabled: !!access.enabled,
+        updated_date: access.updated_date,
+      });
+    }
 
     if (action === 'issue') {
+      if (!me) return json({ error: 'Sign in required' }, 401);
       const { data: profile } = await svc
         .from('profiles')
         .select('id, full_name, membership_number, membership_started_at, membership_expires_at')
@@ -126,10 +260,14 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'verify') {
-      // Bar-side check. Staff only — this reveals whether a given person is a
-      // paying member, which is not public information about them.
-      if (me.role !== 'admin' && me.role !== 'moderator') {
-        return json({ error: 'Staff only' }, 403);
+      // Bar-side check. Staff or a bar device only — this reveals whether a
+      // given person is a paying member, which is not public information.
+      if (!isStaffRole(me?.role)) {
+        const barSession = trimToLength(input?.bar_session, 2000);
+        if (!barSession) return json({ error: 'Staff only', code: 'staff_only' }, 403);
+        if (!(await barSessionValid(svc, barSession))) {
+          return json({ error: 'The bar access code has changed. Enter the new code.', code: 'bar_session_invalid' }, 401);
+        }
       }
       // Two ways in: a scanned token, or a member number typed by hand when a
       // code won't scan. Both resolve to the same live database check.
@@ -175,6 +313,7 @@ Deno.serve(async (req) => {
           number: profile.membership_number,
           expires_at: profile.membership_expires_at,
         },
+        perks: await livePerks(svc),
       });
     }
 

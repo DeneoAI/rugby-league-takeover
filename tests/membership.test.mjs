@@ -102,11 +102,12 @@ test("the scannable code is short-lived and signed, not a bare member number", (
   assert.match(src, /function safeEqual/, "signature comparison must be constant-time");
 });
 
-test("verification re-reads live membership and is staff-only", () => {
+test("verification re-reads live membership and needs staff or a bar session", () => {
   const src = card();
   // The token proves WHO; whether they're a member is always read fresh, so a
   // refund or revocation takes effect at the bar immediately.
-  assert.match(src, /if \(me\.role !== 'admin' && me\.role !== 'moderator'\)/, "membership status is not public info");
+  assert.match(src, /if \(!isStaffRole\(me\?\.role\)\) \{\s*const barSession/, "membership status is not public info");
+  assert.match(src, /await barSessionValid\(svc, barSession\)/, "a bar session must be checked server-side");
   const verify = src.slice(src.indexOf("if (action === 'verify')"));
   assert.match(verify, /\.from\('profiles'\)/, "verify must hit the database, not trust the token");
   assert.match(verify, /isActive\(profile\.membership_expires_at\)/);
@@ -115,8 +116,9 @@ test("verification re-reads live membership and is staff-only", () => {
 
 test("the QR opens the staff check page so any phone camera works", () => {
   const ui = read("../src/components/membership/MembershipCard.jsx");
-  assert.match(ui, /\/verify-member\?t=\$\{encodeURIComponent\(data\.token\)\}/);
-  assert.match(read("../src/App.jsx"), /path="\/verify-member"/, "the route must exist");
+  assert.match(ui, /\/scan\?t=\$\{encodeURIComponent\(data\.token\)\}/);
+  assert.match(read("../src/App.jsx"), /path="\/scan"/, "the route must exist");
+  assert.match(read("../src/App.jsx"), /path="\/verify-member"/, "older cards must still resolve");
 });
 
 test("wallet buttons stay hidden until the passes are actually provisioned", () => {

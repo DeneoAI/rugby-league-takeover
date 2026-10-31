@@ -64,7 +64,7 @@ export default function MembershipDiscountsManager() {
   const createMutation = useMutation({
     mutationFn: () => {
       const title = draft.title.trim();
-      if (!title) throw new Error("Give the discount a name.");
+      if (!title) throw new Error("Give the perk a name.");
       const startsAt = fromLocalInput(draft.starts_at);
       const endsAt = fromLocalInput(draft.ends_at);
       const problem = windowError(startsAt, endsAt);
@@ -91,7 +91,7 @@ export default function MembershipDiscountsManager() {
   });
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.MembershipDiscount.delete(id),
-    onSuccess: () => { refresh(); toast({ title: "Discount removed" }); },
+    onSuccess: () => { refresh(); toast({ title: "Perk removed" }); },
     onError,
   });
 
@@ -103,7 +103,7 @@ export default function MembershipDiscountsManager() {
   const saveText = (discount, field, value) => {
     const next = value.trim();
     if (field === "title" && !next) {
-      toast({ title: "A discount needs a name", variant: "destructive" });
+      toast({ title: "A perk needs a name", variant: "destructive" });
       return;
     }
     if ((discount[field] || "") === next) return;
@@ -122,20 +122,20 @@ export default function MembershipDiscountsManager() {
   return (
     <section id="membership-discounts-admin" className="scroll-mt-28 border border-border bg-card p-6">
       <h2 className="flex items-center gap-2 font-display text-3xl uppercase">
-        <BadgePercent className="h-6 w-6 text-primary" /> Member Discounts
+        <BadgePercent className="h-6 w-6 text-primary" /> Member Perks
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        The discounts and perks that come with an RLT membership. Members see the live ones on their
-        Membership page, and staff see them after scanning a valid member card.{" "}
+        The perks and discounts that come with every RLT membership. Members see the live ones under their
+        member card in My Account, and bar staff see them after scanning a valid card on /scan.{" "}
         <span className="font-bold text-foreground">{liveCount} live now.</span>
       </p>
 
       <div className="mt-5 grid gap-3 border border-border bg-background/40 p-4">
         <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          <Plus className="h-4 w-4" /> Add a discount
+          <Plus className="h-4 w-4" /> Add a perk
         </p>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_200px]">
-          <Input aria-label="Discount name" placeholder="Name (e.g. Bar discounts)" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="h-11 rounded-none" />
+          <Input aria-label="Perk name" placeholder="Name (e.g. Bar discounts)" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="h-11 rounded-none" />
           <Input aria-label="Headline value" placeholder="Value (e.g. 10% off)" value={draft.discount_label} onChange={(e) => setDraft({ ...draft, discount_label: e.target.value })} className="h-11 rounded-none" />
         </div>
         <Textarea aria-label="Details" placeholder="Details members will see (what's included, any limits)" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} className="min-h-20 rounded-none" />
@@ -157,7 +157,7 @@ export default function MembershipDiscountsManager() {
           <Input type="number" aria-label="Sort order" placeholder="Sort order" value={draft.sort_order} onChange={(e) => setDraft({ ...draft, sort_order: e.target.value })} className="h-11 w-32 rounded-none" />
           <label className="flex min-h-11 items-center gap-2 text-sm">Visible to members <Switch checked={draft.is_active !== false} onCheckedChange={(v) => setDraft({ ...draft, is_active: v })} /></label>
           <Button size="mobile" onClick={() => createMutation.mutate()} disabled={!draft.title.trim() || createMutation.isPending} className="ml-auto w-full rounded-none bg-primary hover:bg-primary/90 sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" /> Add discount
+            <Plus className="mr-2 h-4 w-4" /> Add perk
           </Button>
         </div>
         <p className="text-[11px] text-muted-foreground">
@@ -178,7 +178,7 @@ export default function MembershipDiscountsManager() {
                 <span className={`border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${STATUS_STYLES[status]}`}>{status}</span>
               </div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_200px_100px]">
-                <Input aria-label="Discount name" defaultValue={discount.title || ""} onBlur={(e) => saveText(discount, "title", e.target.value)} className="h-11 rounded-none" />
+                <Input aria-label="Perk name" defaultValue={discount.title || ""} onBlur={(e) => saveText(discount, "title", e.target.value)} className="h-11 rounded-none" />
                 <Input aria-label="Headline value" placeholder="Value (e.g. 10% off)" defaultValue={discount.discount_label || ""} onBlur={(e) => saveText(discount, "discount_label", e.target.value)} className="h-11 rounded-none" />
                 <Input aria-label="Sort order" type="number" defaultValue={discount.sort_order ?? 1} onBlur={(e) => updateMutation.mutate({ id: discount.id, data: { sort_order: Number(e.target.value) || 1 } })} className="h-11 rounded-none" />
               </div>
@@ -204,7 +204,7 @@ export default function MembershipDiscountsManager() {
                 {confirmDeleteId === discount.id ? (
                   <div className="ml-auto flex flex-wrap items-center gap-2 border border-destructive/60 bg-destructive/10 px-3 py-2">
                     <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
-                    <span className="text-xs font-bold text-destructive">Delete this discount?</span>
+                    <span className="text-xs font-bold text-destructive">Delete this perk?</span>
                     <Button variant="destructive" size="sm" className="h-8 rounded-none" onClick={() => { deleteMutation.mutate(discount.id); setConfirmDeleteId(null); }}>Yes, delete</Button>
                     <Button variant="outline" size="sm" className="h-8 rounded-none" onClick={() => setConfirmDeleteId(null)}>Cancel</Button>
                   </div>

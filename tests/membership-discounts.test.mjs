@@ -44,6 +44,7 @@ test("discounts are admin-written and only live rows are public", () => {
 test("the admin manager, member view and staff check all use the same entity", () => {
   assert.match(read("../src/api/base44Client.js"), /MembershipDiscount: 'membership_discounts'/);
   assert.match(read("../src/components/admin/panels/StorePanel.jsx"), /MembershipDiscountsManager/);
-  assert.match(read("../src/components/account/MembershipTab.jsx"), /liveDiscounts/);
-  assert.match(read("../src/pages/VerifyMember.jsx"), /liveDiscounts/);
+  assert.match(read("../src/components/membership/MemberPerks.jsx"), /liveDiscounts/);
+  assert.match(read("../src/components/account/MembershipTab.jsx"), /useMemberPerks/);
+  assert.match(read("../supabase/functions/membershipCard/index.ts"), /perks: await livePerks\(svc\)/);
 });

@@ -3,7 +3,7 @@ import { LoadingFallback } from "@/components/ui/LoadingFallback";
 import { QueryClientProvider } from '@tanstack/react-query'
 import { MotionConfig } from 'framer-motion'
 import { queryClientInstance } from '@/lib/query-client';
-import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import PublicLayout from '@/components/public/PublicLayout';
 
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -35,8 +35,14 @@ const DeleteAccount = lazyWithRetry(() => import("./pages/DeleteAccount"), "dele
 const SwapBoard = lazyWithRetry(() => import("./pages/SwapBoard"), "swap-board");
 const Shipping = lazyWithRetry(() => import("./pages/Shipping"), "shipping");
 const Refunds = lazyWithRetry(() => import("./pages/Refunds"), "refunds");
-// Standalone (no site chrome): staff open this from a phone camera scan at the bar.
-const VerifyMember = lazyWithRetry(() => import("./pages/VerifyMember"), "verify-member");
+// Standalone (no site chrome): bar staff open this to scan member cards, either
+// in-page with the camera or from a phone camera scan of the card's QR.
+const Scan = lazyWithRetry(() => import("./pages/Scan"), "scan");
+
+function LegacyVerifyRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/scan${search}`} replace />;
+}
 const Login = lazyWithRetry(() => import("./pages/Login"), "login");
 const Register = lazyWithRetry(() => import("./pages/Register"), "register");
 const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"), "forgot-password");
@@ -154,7 +160,9 @@ const AuthenticatedApp = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-member" element={<VerifyMember />} />
+        <Route path="/scan" element={<Scan />} />
+        {/* Cards issued before /scan pointed here; keep the token working. */}
+        <Route path="/verify-member" element={<LegacyVerifyRedirect />} />
         <Route path="/admin/*" element={<RequireAdmin><Admin /></RequireAdmin>} />
         <Route path="/account/*" element={<RequireAuth><Account /></RequireAuth>} />
         <Route path="*" element={<PageNotFound />} />

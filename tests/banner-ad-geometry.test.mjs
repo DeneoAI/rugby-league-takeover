@@ -72,3 +72,34 @@ test("admin can label a creative with the large mobile banner size", () => {
     /key:\s*"large-mobile-banner",\s*label:\s*"Large Mobile Banner",\s*dim:\s*"320 × 100"/,
   );
 });
+
+test("an ad carries a desktop and a mobile creative, each falling back to the other", async () => {
+  const runtime = code("../src/components/ads/AdSlotRuntime.jsx");
+  // The mobile image is swapped in at the same breakpoint device targeting uses.
+  assert.match(runtime, /MOBILE_AD_QUERY = "\(max-width: 767px\)"/);
+  assert.match(runtime, /<source media=\{MOBILE_AD_QUERY\} srcSet=\{mobileSrc\} \/>/);
+
+  const src = fs.readFileSync(new URL("../src/components/ads/AdSlotRuntime.jsx", import.meta.url), "utf8");
+  const fn = src.match(/export function adCreatives\(ad\) \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(fn, "adCreatives not found");
+  const adCreatives = new Function(`${fn.replace("export ", "")}; return adCreatives;`)();
+  assert.deepEqual(adCreatives({ image_url: "d.png", mobile_image_url: "m.png" }), { desktop: "d.png", mobile: "m.png" });
+  assert.deepEqual(adCreatives({ image_url: "d.png" }), { desktop: "d.png", mobile: "d.png" });
+  assert.deepEqual(adCreatives({ image_url: "", mobile_image_url: "m.png" }), { desktop: "m.png", mobile: "m.png" });
+});
+
+test("the Sponsored label sits under the creative, not over the artwork", () => {
+  const runtime = code("../src/components/ads/AdSlotRuntime.jsx");
+  assert.doesNotMatch(runtime, /absolute top-0 right-0[^"]*"[^>]*>\s*Sponsored/);
+  assert.match(runtime, /absolute right-0 top-full[^"]*"[\s\S]{0,200}?>\s*Sponsored\s*</);
+});
+
+test("admin form takes a desktop and a mobile banner, and the column exists", () => {
+  const admin = code("../src/components/admin/AdsManager.jsx");
+  assert.match(admin, /label="Desktop Banner"/);
+  assert.match(admin, /label="Mobile Banner"/);
+  assert.match(admin, /mobile_image_url: url/);
+  const sql = fs.readFileSync(new URL("../supabase/migrations/0041_site_ads_mobile_image.sql", import.meta.url), "utf8");
+  assert.match(sql, /add column if not exists mobile_image_url text/);
+  assert.match(sql, /alter column image_url drop not null/);
+});

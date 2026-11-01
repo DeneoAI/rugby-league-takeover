@@ -41,12 +41,28 @@ function isAdScheduleActive(ad) {
 }
 
 /* ── Device targeting ── */
+// One breakpoint for both device targeting and the desktop/mobile creative.
+export const MOBILE_AD_QUERY = "(max-width: 767px)";
+
 function matchesDevice(ad) {
   const target = ad?.device_target || "all";
   if (target === "all") return true;
   if (typeof window === "undefined" || !window.matchMedia) return true;
-  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  const isMobile = window.matchMedia(MOBILE_AD_QUERY).matches;
   return target === (isMobile ? "mobile" : "desktop");
+}
+
+/* ── Creatives: an ad can carry a desktop image (image_url) and a mobile
+   image (mobile_image_url). Each falls back to the other when it's empty. ── */
+export function adCreatives(ad) {
+  const desktop = ad?.image_url?.trim() || "";
+  const mobile = ad?.mobile_image_url?.trim() || "";
+  return { desktop: desktop || mobile, mobile: mobile || desktop };
+}
+
+function withRetry(url, retried) {
+  if (!url || !retried) return url;
+  return url + (url.includes("?") ? "&" : "?") + "_retry=1";
 }
 
 /* ── Frequency capping (session-scoped) ── */
@@ -193,7 +209,6 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
   const [imgError, setImgError] = useState(false);
   const [imgRetried, setImgRetried] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgSrc, setImgSrc] = useState(null);
   const [minimized, setMinimizedState] = useState(() => getMinimized(position));
   const [isHovered, setIsHovered] = useState(false);
   const [viewable, setViewable] = useState(false);
@@ -266,7 +281,6 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
         setImgError(false);
         setImgRetried(false);
         setImgLoaded(false);
-        setImgSrc(null);
         setViewable(false);
         tracked.current = false;
       }
@@ -291,7 +305,6 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
         setImgError(false);
         setImgRetried(false);
         setImgLoaded(false);
-        setImgSrc(null);
         setViewable(false);
         tracked.current = false;
       }
@@ -300,12 +313,11 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
     return () => clearTimeout(rotationTimer.current);
   }, [ads, currentAd, enabled]);
 
-  /* ── Set image source (shell already intersected, so we load immediately) ── */
-  useEffect(() => {
-    if (currentAd?.image_url) {
-      setImgSrc(currentAd.image_url);
-    }
-  }, [currentAd?.image_url]);
+  /* ── Image sources (shell already intersected, so we load immediately).
+     A <picture> swaps between them on resize/rotation by itself. ── */
+  const creatives = adCreatives(currentAd);
+  const desktopSrc = withRetry(creatives.desktop, imgRetried);
+  const mobileSrc = withRetry(creatives.mobile, imgRetried);
 
   /* ── Impression Tracking ── */
   useEffect(() => {
@@ -377,13 +389,12 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
 
   const handleImgError = useCallback(() => {
     if (!mountedRef.current) return;
-    if (!imgRetried && currentAd?.image_url) {
+    if (!imgRetried && (currentAd?.image_url || currentAd?.mobile_image_url)) {
       setImgRetried(true);
-      setImgSrc(currentAd.image_url + (currentAd.image_url.includes("?") ? "&" : "?") + "_retry=1");
     } else {
       setImgError(true);
     }
-  }, [imgRetried, currentAd?.image_url]);
+  }, [imgRetried, currentAd?.image_url, currentAd?.mobile_image_url]);
 
   if (!enabled) return null;
 
@@ -546,18 +557,6 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
             />
           </div>
 
-          <span
-            className="absolute top-0 right-0 z-20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] font-mono pointer-events-none"
-            style={{
-              background: "hsl(var(--background) / 0.7)",
-              color: "hsl(var(--muted-foreground) / 0.6)",
-              borderLeft: "1px solid hsl(var(--border) / 0.3)",
-              borderBottom: "1px solid hsl(var(--border) / 0.3)",
-            }}
-          >
-            Sponsored
-          </span>
-
           <button
             onClick={handleMinimize}
             className="absolute top-1 left-1 z-30 flex h-7 w-7 items-center justify-center bg-black/50 backdrop-blur-sm hover:bg-black/70 active:bg-black/80 transition-colors cursor-pointer opacity-60 hover:opacity-100 sm:opacity-0 sm:group-hover/ad:opacity-80"
@@ -622,24 +621,29 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
             className="block"
             aria-label={`Visit ${currentAd.title || "sponsor"}`}
           >
-            {imgSrc ? (
-              <img
-                src={imgSrc}
-                alt={currentAd.title || "Advertisement"}
-                className="block mx-auto object-contain"
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: position?.startsWith("banner") ? 120 : 250,
-                  width: "auto",
-                  height: "auto",
-                  opacity: imgLoaded ? 1 : 0,
-                  transform: isHovered ? "scale(1.01)" : "scale(1)",
-                  transition: "opacity 0.5s ease, transform 0.4s ease",
-                }}
-                decoding="async"
-                onLoad={() => { if (mountedRef.current) setImgLoaded(true); }}
-                onError={handleImgError}
-              />
+            {desktopSrc ? (
+              <picture>
+                {mobileSrc !== desktopSrc && (
+                  <source media={MOBILE_AD_QUERY} srcSet={mobileSrc} />
+                )}
+                <img
+                  src={desktopSrc}
+                  alt={currentAd.title || "Advertisement"}
+                  className="block mx-auto object-contain"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: position?.startsWith("banner") ? 120 : 250,
+                    width: "auto",
+                    height: "auto",
+                    opacity: imgLoaded ? 1 : 0,
+                    transform: isHovered ? "scale(1.01)" : "scale(1)",
+                    transition: "opacity 0.5s ease, transform 0.4s ease",
+                  }}
+                  decoding="async"
+                  onLoad={() => { if (mountedRef.current) setImgLoaded(true); }}
+                  onError={handleImgError}
+                />
+              </picture>
             ) : (
               <div
                 className="w-full"
@@ -659,6 +663,16 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
           />
         </motion.div>
       </AnimatePresence>
+
+      {/* "Sponsored" sits just under the creative, never on it: overlaid on
+          the corner it covered sponsor artwork (the Stadium Swim logo on the
+          desktop banner, the event time on the mobile one). */}
+      <span
+        className="pointer-events-none absolute right-0 top-full mt-0.5 text-[8px] font-bold uppercase leading-none tracking-[0.2em] font-mono"
+        style={{ color: "hsl(var(--muted-foreground) / 0.55)" }}
+      >
+        Sponsored
+      </span>
     </div>
   );
 }

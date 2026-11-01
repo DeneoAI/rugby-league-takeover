@@ -67,6 +67,14 @@ const sampleAd = (position = "footer") => ({
 /* ── Helpers ── */
 // An ad's thumbnail for admin previews: the desktop creative, else the mobile one.
 const adPreviewImage = (ad) => ad?.image_url || ad?.mobile_image_url || "";
+// Only let typed/pasted creative URLs into an <img> preview when they use an
+// image-safe scheme (http(s), site-relative, uploaded blob, data:image).
+const SAFE_IMAGE_SRC = /^(https?:\/\/|\/(?!\/)|blob:|data:image\/)/i;
+function safeImageSrc(url) {
+  const value = typeof url === "string" ? url.trim() : "";
+  if (!SAFE_IMAGE_SRC.test(value)) return "";
+  return value;
+}
 function readLS(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 }
@@ -748,8 +756,8 @@ export default function AdsManager() {
                 <div className="border border-border/40 bg-black/20 p-3 space-y-3">
                   <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-muted-foreground/60">Preview</p>
                   {[
-                    { key: "desktop", label: "Desktop", src: editing.image_url || editing.mobile_image_url, maxWidth: 400 },
-                    { key: "mobile", label: "Mobile", src: editing.mobile_image_url || editing.image_url, maxWidth: 220 },
+                    { key: "desktop", label: "Desktop", src: safeImageSrc(editing.image_url || editing.mobile_image_url), maxWidth: 400 },
+                    { key: "mobile", label: "Mobile", src: safeImageSrc(editing.mobile_image_url || editing.image_url), maxWidth: 220 },
                   ].map((p) => (
                     <div key={p.key}>
                       <p className="text-[8px] font-mono uppercase tracking-[0.2em] text-muted-foreground/50 mb-1">
@@ -757,7 +765,7 @@ export default function AdsManager() {
                         {p.key === "desktop" && !editing.image_url && " (using mobile image)"}
                         {p.key === "mobile" && !editing.mobile_image_url && " (using desktop image)"}
                       </p>
-                      <div className="mx-auto overflow-hidden border border-border/20" style={{ maxWidth: p.maxWidth }}>
+                      {p.src && <div className="mx-auto overflow-hidden border border-border/20" style={{ maxWidth: p.maxWidth }}>
                         <img
                           src={p.src}
                           alt={`${p.label} preview`}
@@ -765,7 +773,7 @@ export default function AdsManager() {
                           style={{ maxHeight: 200 }}
                           onError={(e) => { e.target.style.display = "none"; }}
                         />
-                      </div>
+                      </div>}
                     </div>
                   ))}
                 </div>

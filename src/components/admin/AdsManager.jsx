@@ -35,6 +35,7 @@ const SIZES = [
 const emptyAd = () => ({
   title: "",
   image_url: "",
+  mobile_image_url: "",
   target_url: "",
   position: "banner-top",
   size: "leaderboard",
@@ -64,6 +65,16 @@ const sampleAd = (position = "footer") => ({
 });
 
 /* ── Helpers ── */
+// An ad's thumbnail for admin previews: the desktop creative, else the mobile one.
+const adPreviewImage = (ad) => ad?.image_url || ad?.mobile_image_url || "";
+// Only let typed/pasted creative URLs into an <img> preview when they use an
+// image-safe scheme (http(s), site-relative, uploaded blob, data:image).
+const SAFE_IMAGE_SRC = /^(https?:\/\/|\/(?!\/)|blob:|data:image\/)/i;
+function safeImageSrc(url) {
+  const value = typeof url === "string" ? url.trim() : "";
+  if (!SAFE_IMAGE_SRC.test(value)) return "";
+  return value;
+}
 function readLS(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 }
@@ -91,7 +102,9 @@ function getStatusLabel(ad) {
 function validateAd(ad) {
   const errors = [];
   if (!ad.title?.trim()) errors.push("Title is required");
-  if (!ad.image_url?.trim()) errors.push("Ad creative image is required");
+  if (!ad.image_url?.trim() && !ad.mobile_image_url?.trim()) {
+    errors.push("Add a desktop or a mobile banner image");
+  }
   if (ad.target_url && !isValidUrl(ad.target_url)) errors.push("Target URL is not a valid URL");
   if (ad.start_date && ad.end_date && ad.start_date > ad.end_date) errors.push("End date must be after start date");
   return errors;
@@ -135,7 +148,16 @@ export default function AdsManager() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: async (ad) => {
+    mutationFn: async (draft) => {
+      // An empty image field is stored as null. mobile_image_url is only sent
+      // when it has a value or the row already has the column, so ads still
+      // save on a database where migration 0041 hasn't been applied yet.
+      const ad = { ...draft, image_url: draft.image_url?.trim() || null };
+      const mobile = draft.mobile_image_url?.trim();
+      const original = ads.find((a) => a.id === draft.id);
+      if (mobile) ad.mobile_image_url = mobile;
+      else if (original && "mobile_image_url" in original) ad.mobile_image_url = null;
+      else delete ad.mobile_image_url;
       if (ad.id) {
         const { id, ...payload } = ad;
         return base44.entities.SiteAd.update(id, payload);
@@ -412,9 +434,9 @@ export default function AdsManager() {
                 >
                   {/* Position preview */}
                   <div className="relative h-28 bg-gradient-to-b from-muted/20 to-muted/5 flex items-center justify-center overflow-hidden">
-                    {active?.image_url ? (
+                    {adPreviewImage(active) ? (
                       <img
-                        src={active.image_url}
+                        src={adPreviewImage(active)}
                         alt={active.title}
                         className="h-full w-full object-cover opacity-60 transition-opacity duration-300 group-hover/slot:opacity-80"
                       />
@@ -541,8 +563,8 @@ export default function AdsManager() {
                     <div key={ad.id} className="flex items-center gap-4 p-4 hover:bg-muted/5 transition-colors">
                       {/* Thumbnail */}
                       <div className="w-16 h-12 border border-border/40 bg-muted/10 shrink-0 overflow-hidden flex items-center justify-center">
-                        {ad.image_url ? (
-                          <img src={ad.image_url} alt="" className="w-full h-full object-cover" />
+                        {adPreviewImage(ad) ? (
+                          <img src={adPreviewImage(ad)} alt="" className="w-full h-full object-cover" />
                         ) : (
                           <ImageIcon className="h-4 w-4 text-muted-foreground/30" />
                         )}
@@ -700,25 +722,60 @@ export default function AdsManager() {
                 </div>
               </div>
 
-              <ImageField
-                label="Ad Creative *"
-                value={editing.image_url}
-                onChange={(url) => setEditing({ ...editing, image_url: url })}
-              />
+              {/* Two creatives: phones (under 768px) get the mobile image,
+                  everything wider gets the desktop one. Either can be left
+                  empty and the other is used everywhere. */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-1.5">
+                  <ImageField
+                    label="Desktop Banner"
+                    value={editing.image_url || ""}
+                    onChange={(url) => setEditing({ ...editing, image_url: url })}
+                  />
+                  <p className="text-[10px] text-muted-foreground/70 font-mono">
+                    Shown on screens 768px and wider. Banner Top: 1456 × 180.
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 gap-1.5">
+                  <ImageField
+                    label="Mobile Banner"
+                    value={editing.mobile_image_url || ""}
+                    onChange={(url) => setEditing({ ...editing, mobile_image_url: url })}
+                  />
+                  <p className="text-[10px] text-muted-foreground/70 font-mono">
+                    Shown on phones. Banner Top: 640 × 200.
+                  </p>
+                </div>
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 font-mono -mt-2">
+                Add at least one. If only one is set, it's shown on every device.
+              </p>
 
               {/* Live preview */}
-              {editing.image_url && (
-                <div className="border border-border/40 bg-black/20 p-3">
-                  <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-muted-foreground/60 mb-2">Preview</p>
-                  <div className="mx-auto overflow-hidden border border-border/20" style={{ maxWidth: 400 }}>
-                    <img
-                      src={editing.image_url}
-                      alt="Preview"
-                      className="w-full object-contain"
-                      style={{ maxHeight: 200 }}
-                      onError={(e) => { e.target.style.display = "none"; }}
-                    />
-                  </div>
+              {(editing.image_url || editing.mobile_image_url) && (
+                <div className="border border-border/40 bg-black/20 p-3 space-y-3">
+                  <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-muted-foreground/60">Preview</p>
+                  {[
+                    { key: "desktop", label: "Desktop", src: safeImageSrc(editing.image_url || editing.mobile_image_url), maxWidth: 400 },
+                    { key: "mobile", label: "Mobile", src: safeImageSrc(editing.mobile_image_url || editing.image_url), maxWidth: 220 },
+                  ].map((p) => (
+                    <div key={p.key}>
+                      <p className="text-[8px] font-mono uppercase tracking-[0.2em] text-muted-foreground/50 mb-1">
+                        {p.label}
+                        {p.key === "desktop" && !editing.image_url && " (using mobile image)"}
+                        {p.key === "mobile" && !editing.mobile_image_url && " (using desktop image)"}
+                      </p>
+                      {p.src && <div className="mx-auto overflow-hidden border border-border/20" style={{ maxWidth: p.maxWidth }}>
+                        <img
+                          src={p.src}
+                          alt={`${p.label} preview`}
+                          className="w-full object-contain"
+                          style={{ maxHeight: 200 }}
+                          onError={(e) => { e.target.style.display = "none"; }}
+                        />
+                      </div>}
+                    </div>
+                  ))}
                 </div>
               )}
 

@@ -8,7 +8,11 @@
     },
     "image_url": {
       "type": "string",
-      "description": "Advertisement creative image URL"
+      "description": "Desktop creative image URL (also used on mobile when no mobile image is set)"
+    },
+    "mobile_image_url": {
+      "type": "string",
+      "description": "Mobile creative image URL, shown below 768px (falls back to image_url)"
     },
     "target_url": {
       "type": "string",
@@ -96,7 +100,6 @@
   },
   "required": [
     "title",
-    "image_url",
     "position",
     "size"
   ],

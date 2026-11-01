@@ -25,8 +25,9 @@ swaps to a shorter, chunkier mobile strip instead. The artwork has to
 be designed for each shape - a desktop banner shrunk to phone width
 becomes an unreadable sliver.
 
-The site serves the right one automatically: you upload both and tag
-one "Desktop" and one "Mobile" in the admin (see UPLOADING below).
+The site serves the right one automatically: you upload both files
+on the same ad, in its "Desktop Banner" and "Mobile Banner" fields
+(see UPLOADING below).
 
 
 FULL SPECS
@@ -151,25 +152,23 @@ UPLOADING (admin side - internal note)
 --------------------------------------
 Command Centre -> Ads:
 
-  Ad 1:  Position = Banner Top
-         Size     = Leaderboard (728 x 90)
-         Device   = Desktop
-         Image    = the 1456 x 180 file
+  One ad:  Position       = Banner Top
+           Size           = Leaderboard (728 x 90)
+           Device         = All Devices
+           Desktop Banner = the 1456 x 180 file
+           Mobile Banner  = the 640 x 200 file
 
-  Ad 2:  Position = Banner Top
-         Size     = Large Mobile Banner (320 x 100)
-         Device   = Mobile
-         Image    = the 640 x 200 file
+The site picks between the two images at the 768 px breakpoint, so a
+visitor only ever sees one, and both share the click-through URL,
+schedule and stats.
 
-Both can carry the same click-through URL and the same schedule.
-The site picks between them at the 768 px breakpoint, so a visitor
-only ever sees one.
-
-If you upload only ONE ad and leave Device = All, that single
-creative is used on both desktop and mobile. It will still fit
-(nothing breaks, nothing is cropped) but it will render small with
-empty space on whichever shape it was not designed for. Two files is
+If only one image is set, it is used on both desktop and mobile. It
+will still fit (nothing breaks, nothing is cropped) but it renders
+small on whichever shape it was not designed for. Two files is
 strongly preferred.
+
+(Two separate ads, one with Device = Desktop and one with Device =
+Mobile, still works too.)
 
 
 ONE-LINE EMAIL YOU CAN SEND STADIUM SWIM

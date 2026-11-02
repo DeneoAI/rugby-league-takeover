@@ -112,7 +112,7 @@ export default function PublicLayout() {
           `relative z-10` lifts it above the home page's fixed BackgroundVideo
           layer (z-0): unpositioned, the banner painted underneath it and was
           invisible even when an ad loaded. */}
-      <div className="empty:hidden relative z-10 w-full border-b border-border/30 px-4 pt-[calc(5rem+env(safe-area-inset-top,0px))] pb-4">
+      <div className="empty:hidden relative z-10 w-full border-b border-border/30 pt-[calc(5rem+env(safe-area-inset-top,0px))] pb-4">
         <AdSlot
           position="banner-top"
           size="banner"

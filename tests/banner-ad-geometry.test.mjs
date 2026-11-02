@@ -72,3 +72,42 @@ test("admin can label a creative with the large mobile banner size", () => {
     /key:\s*"large-mobile-banner",\s*label:\s*"Large Mobile Banner",\s*dim:\s*"320 × 100"/,
   );
 });
+
+test("the phone banner stretches to the screen instead of stopping at 320px", () => {
+  const ad = code("../src/components/ads/AdSlot.jsx");
+
+  // 320 is the IAB unit width, but phones are 360-430pt wide, so a slot
+  // capped at 320 covered only 74% of a 430pt screen.
+  assert.match(ad, /"large-mobile-banner":\s*\{[^}]*fill: true/);
+  assert.match(ad, /"mobile-banner":\s*\{[^}]*fill: true/);
+  assert.match(ad, /maxWidth: preset\.fill \? "100%" : preset\.w/);
+
+  // The desktop leaderboard deliberately does NOT stretch — 728 centred in
+  // the content column is the standard placement.
+  const leaderboard = ad.match(/^\s*leaderboard:\s*\{[^}]*\}/m)?.[0];
+  assert.ok(leaderboard, "leaderboard preset not found");
+  assert.doesNotMatch(leaderboard, /fill/);
+});
+
+test("nothing boxes the top banner in from the screen edge", () => {
+  const layout = code("../src/components/public/PublicLayout.jsx");
+  const wrapper = layout.match(/<div className="empty:hidden[^"]*"/)?.[0];
+  assert.ok(wrapper, "banner wrapper not found");
+  // A horizontal gutter on the wrapper is what kept a full-bleed banner off
+  // the screen edge; vertical padding (nav clearance) must stay.
+  assert.doesNotMatch(wrapper, /\b(px-|pl-|pr-)\d/, "banner wrapper must have no horizontal gutter");
+  assert.match(wrapper, /pt-\[calc\(/, "nav clearance must remain");
+});
+
+test("the creative scales up to the slot, not just down", () => {
+  const runtime = code("../src/components/ads/AdSlotRuntime.jsx");
+  const img = runtime.match(/<img\s+src=\{imgSrc\}[\s\S]*?\/>/)?.[0];
+  assert.ok(img, "creative img not found");
+  // width/height auto only ever scaled DOWN, so a 320-wide file sat at 320
+  // inside a 430 slot.
+  assert.doesNotMatch(img, /width: "auto"/);
+  assert.match(img, /width: "100%"/);
+  assert.match(img, /height: "100%"/);
+  // contain, never cover: a mismatched ratio must letterbox, not crop.
+  assert.match(img, /object-contain/);
+});

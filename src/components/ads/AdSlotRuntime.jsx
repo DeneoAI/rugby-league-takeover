@@ -679,14 +679,16 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
                 alt={currentAd.title || "Advertisement"}
                 className="block object-contain"
                 style={{
+                  // Fill the slot, which already carries the correct aspect
+                  // ratio. width/height auto only ever scaled artwork DOWN, so
+                  // a 320-wide creative stayed 320 wide inside a 430 slot and
+                  // the banner covered three quarters of the screen.
+                  // object-contain still never crops and never distorts: a
+                  // mismatched ratio letterboxes rather than stretching.
+                  width: "100%",
+                  height: "100%",
                   maxWidth: "100%",
-                  // Bounded by the slot itself rather than a fixed pixel cap:
-                  // the shell already carries the right aspect ratio, and the
-                  // old 120px/250px cap let a wrong-shaped creative render
-                  // taller than its own slot and spill over the page.
                   maxHeight: "100%",
-                  width: "auto",
-                  height: "auto",
                   opacity: imgLoaded ? 1 : 0,
                   transform: isHovered ? "scale(1.01)" : "scale(1)",
                   transition: "opacity 0.5s ease, transform 0.4s ease",

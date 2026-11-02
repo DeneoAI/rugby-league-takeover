@@ -5,12 +5,16 @@ const SIZE_MAP = {
   leaderboard:        { w: 728, h: 90,  label: "728 × 90" },
   "medium-rectangle": { w: 300, h: 250, label: "300 × 250" },
   "wide-skyscraper":  { w: 160, h: 600, label: "160 × 600" },
-  "mobile-banner":    { w: 320, h: 50,  label: "320 × 50" },
+  "mobile-banner":    { w: 320, h: 50,  label: "320 × 50", fill: true },
   // IAB large mobile banner — the phone counterpart to the desktop
   // leaderboard. A banner strip must not fall back to a 300×250 square:
   // banner positions cap the creative at 120px tall (AdSlotRuntime), so a
   // square renders at 144×120 inside a 250px box, marooned in dead space.
-  "large-mobile-banner": { w: 320, h: 100, label: "320 × 100" },
+  // fill: stretch to the container instead of stopping at the nominal width.
+  // 320px is the IAB unit, but phones are 360-430pt wide, so a fixed 320
+  // banner covered only 74% of a 430pt screen and read as a floating box
+  // rather than a sponsor strip. The ratio is what matters; the width is not.
+  "large-mobile-banner": { w: 320, h: 100, label: "320 × 100", fill: true },
 };
 
 const RESPONSIVE_FALLBACKS = {
@@ -96,7 +100,7 @@ export default function AdSlot({ position, size, isAdmin = false, className = ""
       style={{
         contain: "layout style",
         width: "100%",
-        maxWidth: preset.w,
+        maxWidth: preset.fill ? "100%" : preset.w,
         aspectRatio: `${preset.w}/${preset.h}`,
         minHeight: preset.h,
         margin: "0 auto",

@@ -7,7 +7,7 @@ Slot: "Banner Top" - the full-width strip under the nav on every page
 SHORT VERSION - ASK THEM FOR TWO FILES
 --------------------------------------
   1. DESKTOP    1456 x 180 px   (displays at 728 x 90)
-  2. MOBILE      640 x 200 px   (displays at 320 x 100)
+  2. MOBILE      960 x 300 px   (fills the phone's full width)
 
   Format:  PNG (still) or GIF / WebP (animated) - all supported
   Colour:  RGB / sRGB
@@ -40,11 +40,19 @@ DESKTOP BANNER
                     iPad landscape)
 
 MOBILE BANNER
-  Display size .... 320 x 100 px  (IAB Large Mobile Banner)
-  Supply at ....... 640 x 200 px  (2x)
-  Aspect ratio .... 3.2 : 1
+  Display size .... edge to edge, about 360-430 px wide and
+                    113-134 px tall depending on the phone
+  Supply at ....... 960 x 300 px
+  Aspect ratio .... 3.2 : 1  (THIS is the number that matters -
+                    the banner stretches to the screen, so the
+                    ratio is fixed but the width is not)
   Shows on ........ screens under 768 px wide (all phones,
                     iPad portrait)
+
+  The mobile banner is FULL BLEED - it runs the whole width of the
+  phone screen, edge to edge. 960 x 300 is supplied oversized on
+  purpose so it stays sharp when stretched across the widest phones
+  (about 2.2x on a 430 pt screen).
 
 Supply at 2x and let the site scale down - that is what keeps it
 sharp on a modern phone or a Retina MacBook. Do NOT supply at 1x
@@ -153,7 +161,7 @@ Command Centre -> Ads -> one ad, two creatives:
 
   Title ............... the campaign name
   Ad Creative Desktop . the 1456 x 180 file
-  Ad Creative Mobile .. the 640 x 200 file  (optional)
+  Ad Creative Mobile .. the 960 x 300 file  (optional)
   Position ............ Banner Top
   Size ................ Leaderboard (728 x 90)
   Device Target ....... All Devices
@@ -177,8 +185,9 @@ One record with two creatives is the better way now.)
 ONE-LINE EMAIL YOU CAN SEND STADIUM SWIM
 ----------------------------------------
 "Could we get the banner artwork as two files please - 1456 x 180 px
-for desktop and 640 x 200 px for mobile (that's 2x the display size
-so it stays sharp on retina screens). PNG is ideal for a still
+for desktop and 960 x 300 px for mobile (both oversized on purpose
+so they stay sharp - the mobile one runs edge to edge on the phone
+screen, so it gets stretched). PNG is ideal for a still
 banner. If you'd rather it moved, an animated GIF works, or animated
 WebP if you can export one - keep it to about 5 seconds, no rapid
 flashing, and under 1 MB. Either way: solid background rather than

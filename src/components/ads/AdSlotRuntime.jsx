@@ -186,6 +186,26 @@ function setMinimized(position, val) {
 
 const ROTATION_INTERVAL = 12000;
 
+// The clickable body of an ad: a full-size link when the ad has a real
+// destination, otherwise a plain box of the same size. Either way it fills the
+// slot and centres the artwork, so every pixel of the banner is pressable.
+function LinkOrStatic({ href, onClick, label, children }) {
+  const fill = "flex h-full w-full items-center justify-center overflow-hidden";
+  if (!href) return <div className={fill}>{children}</div>;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      onClick={onClick}
+      className={fill}
+      aria-label={label}
+    >
+      {children}
+    </a>
+  );
+}
+
 // Presets that are a phone-shaped banner strip. An ad's optional mobile
 // creative is for exactly these — not for in-feed/sidebar rectangles, where a
 // wide 320×100 strip would render as a sliver inside a 300×250 box.
@@ -532,6 +552,10 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
       style={{
         contain: "layout style",
         width: "100%",
+        // Fill the slot the shell reserved. Without this the card is only as
+        // tall as the artwork, so any creative whose shape does not match the
+        // slot leaves dead, unclickable space beneath it.
+        height: "100%",
         margin: "0 auto",
       }}
     >
@@ -546,6 +570,7 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
           className="group/ad relative overflow-hidden border border-border/40 cmd-glass"
           style={{
             width: "100%",
+            height: "100%",
             transition: "box-shadow 0.4s ease, border-color 0.4s ease",
             boxShadow: isHovered ? "0 0 20px -4px hsl(var(--primary) / 0.15)" : "none",
             borderColor: isHovered ? "hsl(var(--primary) / 0.3)" : undefined,
@@ -635,22 +660,31 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
             />
           )}
 
-          <a
-            href={currentAd.target_url && isValidUrl(currentAd.target_url) ? currentAd.target_url : "#"}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
+          {/* The ENTIRE slot is the tap target, not just the artwork. A creative
+              whose shape does not match the slot is centred inside a full-size
+              link, so the empty space around it still opens the sponsor. With
+              a desktop-only creative on a phone that was the difference
+              between 39% and 100% of the banner being pressable.
+              An ad with no usable target_url is not a link at all — it used to
+              render href="#" with target="_blank", so tapping it opened a
+              blank tab. */}
+          <LinkOrStatic
+            href={currentAd.target_url && isValidUrl(currentAd.target_url) ? currentAd.target_url : ""}
             onClick={handleClick}
-            className="block"
-            aria-label={`Visit ${currentAd.title || "sponsor"}`}
+            label={`Visit ${currentAd.title || "sponsor"}`}
           >
             {imgSrc ? (
               <img
                 src={imgSrc}
                 alt={currentAd.title || "Advertisement"}
-                className="block mx-auto object-contain"
+                className="block object-contain"
                 style={{
                   maxWidth: "100%",
-                  maxHeight: position?.startsWith("banner") ? 120 : 250,
+                  // Bounded by the slot itself rather than a fixed pixel cap:
+                  // the shell already carries the right aspect ratio, and the
+                  // old 120px/250px cap let a wrong-shaped creative render
+                  // taller than its own slot and spill over the page.
+                  maxHeight: "100%",
                   width: "auto",
                   height: "auto",
                   opacity: imgLoaded ? 1 : 0,
@@ -670,7 +704,7 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
                 }}
               />
             )}
-          </a>
+          </LinkOrStatic>
 
           <div
             className="absolute bottom-0 left-0 right-0 h-[1px]"

@@ -74,3 +74,31 @@ test("migration 0041 adds the column without disturbing existing ads", () => {
   assert.doesNotMatch(sql, /not null/i, "a new column on a live table must be nullable");
   assert.doesNotMatch(sql, /drop (column|table)/i);
 });
+
+test("the whole slot is the tap target, not just the artwork", () => {
+  const runtime = code("../src/components/ads/AdSlotRuntime.jsx");
+
+  const fn = runtime.match(/function LinkOrStatic\([\s\S]*?\n\}/)?.[0];
+  assert.ok(fn, "LinkOrStatic not found");
+  // Fills the slot and centres the creative, so the empty space around a
+  // wrong-shaped creative still opens the sponsor. With a desktop-only
+  // creative on a phone this was 39% of the banner vs 100%.
+  assert.match(fn, /h-full w-full/);
+  assert.match(fn, /items-center justify-center/);
+
+  // An ad with no destination must not be a link: href="#" plus
+  // target="_blank" opened a blank tab on tap.
+  assert.match(fn, /if \(!href\) return <div className=\{fill\}>\{children\}<\/div>;/);
+  assert.doesNotMatch(runtime, /\? currentAd\.target_url : "#"/);
+
+  // The card has to fill the reserved box or the link cannot either.
+  assert.match(runtime, /width: "100%",\n\s*height: "100%",\n\s*transition: "box-shadow/);
+});
+
+test("a creative is bounded by its slot, not by a fixed pixel cap", () => {
+  const runtime = code("../src/components/ads/AdSlotRuntime.jsx");
+  // The old cap (120px banner / 250px otherwise) let a wrong-shaped creative
+  // render taller than its own slot and spill over the page content.
+  assert.doesNotMatch(runtime, /maxHeight: position\?\.startsWith\("banner"\) \? 120 : 250/);
+  assert.match(runtime, /maxHeight: "100%"/);
+});

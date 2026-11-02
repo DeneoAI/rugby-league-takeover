@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AnimatePresence, motion } from "framer-motion";
 import { jumpTo, scrollToAnchor } from "@/lib/scroll-to-anchor";
+import { sizedImage, LOGO_WIDTH } from "@/lib/storage-image";
 
 const logoUrl = "/icons/icon-192.png";
 const NotificationBell = lazy(() => import("@/components/NotificationBell"));
@@ -37,7 +38,7 @@ export default function SiteNav({ settings = {}, settingsLoading = false }) {
   const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
   const navigateTo = useNavigate();
-  const logo = settings.site_logo_url || (!settingsLoading ? logoUrl : "");
+  const logo = sizedImage(settings.site_logo_url, LOGO_WIDTH) || (!settingsLoading ? logoUrl : "");
 
   const [activeHash, setActiveHash] = useState("");
 

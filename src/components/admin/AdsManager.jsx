@@ -228,9 +228,15 @@ export default function AdsManager() {
       // the form just sat there looking saved.
       onError: (error) => {
         const raw = String(error?.message || "Something went wrong");
-        const description = raw.includes("image_url_mobile")
-          ? "The mobile creative column is missing — run migration 0041 on the database, then save again."
-          : raw;
+        // Map the database's own wording onto the thing an admin can act on.
+        // Both of these mean "the database has not run a migration the admin
+        // UI already offers", which the raw Postgres text does not say.
+        let description = raw;
+        if (raw.includes("image_url_mobile")) {
+          description = "The mobile creative column is missing — run migration 0041 on the database, then save again.";
+        } else if (raw.includes("site_ads_size_check")) {
+          description = "This Size is not allowed by the database yet — run migration 0039, or pick Leaderboard (728 × 90) for now. Size is a label only; it does not change how the ad renders.";
+        }
         setErrors([description]);
         toast({ title: "Could not save ad", description, variant: "destructive" });
       },

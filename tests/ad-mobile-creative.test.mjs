@@ -29,6 +29,10 @@ test("a rejected ad save is reported instead of swallowed", () => {
   assert.ok(saveAd, "saveAd not found");
   assert.match(saveAd, /onError:/, "saveAd must handle failure");
   assert.match(saveAd, /migration 0041/, "a missing column should name its migration");
+  // A size the database's check constraint has not learned yet is the other
+  // way the admin UI can run ahead of the schema.
+  assert.match(saveAd, /site_ads_size_check/);
+  assert.match(saveAd, /migration 0039/);
 });
 
 test("device targeting sits with position and size, not with the rates", () => {

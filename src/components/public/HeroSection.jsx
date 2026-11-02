@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, UserPlus, Calendar, ShoppingBag, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import CursorSpotlight from "./CursorSpotlight";
 import { hideBrokenImage } from "@/lib/img-fallback";
 import { scrollToAnchor } from "@/lib/scroll-to-anchor";
+import { sizedImage, LOGO_WIDTH } from "@/lib/storage-image";
 
 const logoUrl = "/icons/icon-192.png";
 
@@ -34,7 +35,11 @@ const wordVariants = {
 };
 export default function HeroSection({ settings = {}, settingsLoading = false }) {
   const title = settings.hero_title || "The annual\nVegas takeover";
-  const logo = settings.site_logo_url || (!settingsLoading ? logoUrl : "");
+  const logo = sizedImage(settings.site_logo_url, LOGO_WIDTH) || (!settingsLoading ? logoUrl : "");
+  // Hold the logo back until it has fully arrived. The entry animation runs on
+  // mount regardless of the download, so on a slow connection the element was
+  // fully opaque over a half-painted image — a logo sliced in two.
+  const [logoLoaded, setLogoLoaded] = useState(false);
 
   const handleTravelInterestClick = (event) => {
     event.preventDefault();
@@ -92,8 +97,9 @@ export default function HeroSection({ settings = {}, settingsLoading = false }) 
             fetchPriority="high"
             decoding="async"
             onError={hideBrokenImage}
+            onLoad={() => setLogoLoaded(true)}
             initial={{ opacity: 0, y: -80, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ opacity: logoLoaded ? 1 : 0, y: 0, scale: 1 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             className="mb-8 w-52 drop-shadow-[0_15px_30px_rgba(249,115,22,0.25)] sm:w-64 md:w-80 select-none pointer-events-none"
           />

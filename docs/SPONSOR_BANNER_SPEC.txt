@@ -149,27 +149,29 @@ IF THEY SEND AN ANIMATED BANNER - RULES TO PASS ON
 
 UPLOADING (admin side - internal note)
 --------------------------------------
-Command Centre -> Ads:
+Command Centre -> Ads -> one ad, two creatives:
 
-  Ad 1:  Position = Banner Top
-         Size     = Leaderboard (728 x 90)
-         Device   = Desktop
-         Image    = the 1456 x 180 file
+  Title ............... the campaign name
+  Ad Creative Desktop . the 1456 x 180 file
+  Ad Creative Mobile .. the 640 x 200 file  (optional)
+  Position ............ Banner Top
+  Size ................ Leaderboard (728 x 90)
+  Device Target ....... All Devices
+  Target URL .......... where it clicks through to
 
-  Ad 2:  Position = Banner Top
-         Size     = Large Mobile Banner (320 x 100)
-         Device   = Mobile
-         Image    = the 640 x 200 file
+That is it - ONE ad record. The site shows the desktop file on
+screens 768 px and wider and the mobile file below that, and the
+impression and click counts stay on the single record so the numbers
+you report back to the sponsor are the real totals.
 
-Both can carry the same click-through URL and the same schedule.
-The site picks between them at the 768 px breakpoint, so a visitor
-only ever sees one.
+If you leave the mobile creative empty, the desktop file is used
+everywhere. Nothing breaks and nothing is cropped - it just renders
+smaller, with empty space either side, on a phone.
 
-If you upload only ONE ad and leave Device = All, that single
-creative is used on both desktop and mobile. It will still fit
-(nothing breaks, nothing is cropped) but it will render small with
-empty space on whichever shape it was not designed for. Two files is
-strongly preferred.
+(Older setups used TWO ad records paired with Device Target =
+Desktop / Mobile. That still works, but it splits the stats across
+two rows and you have to keep the URL and dates in sync by hand.
+One record with two creatives is the better way now.)
 
 
 ONE-LINE EMAIL YOU CAN SEND STADIUM SWIM

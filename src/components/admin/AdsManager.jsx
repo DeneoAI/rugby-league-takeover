@@ -35,6 +35,7 @@ const SIZES = [
 const emptyAd = () => ({
   title: "",
   image_url: "",
+  image_url_mobile: "",
   target_url: "",
   position: "banner-top",
   size: "leaderboard",
@@ -136,11 +137,16 @@ export default function AdsManager() {
 
   const saveMutation = useMutation({
     mutationFn: async (ad) => {
-      if (ad.id) {
-        const { id, ...payload } = ad;
-        return base44.entities.SiteAd.update(id, payload);
+      // Drop image_url_mobile when it is unset: the column arrives with
+      // migration 0041, and sending it to a database that has not run that
+      // migration yet would fail EVERY ad save, not just ones using it.
+      const payload = { ...ad };
+      if (!payload.image_url_mobile) delete payload.image_url_mobile;
+      if (payload.id) {
+        const { id, ...rest } = payload;
+        return base44.entities.SiteAd.update(id, rest);
       }
-      return base44.entities.SiteAd.create(ad);
+      return base44.entities.SiteAd.create(payload);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['siteAds'] }),
   });
@@ -217,6 +223,16 @@ export default function AdsManager() {
         setEditing(null);
         setView("slots");
         toast({ title: "Ad saved", description: `"${ad.title}" has been saved successfully.` });
+      },
+      // Without this a rejected save did nothing at all: no toast, no error,
+      // the form just sat there looking saved.
+      onError: (error) => {
+        const raw = String(error?.message || "Something went wrong");
+        const description = raw.includes("image_url_mobile")
+          ? "The mobile creative column is missing — run migration 0041 on the database, then save again."
+          : raw;
+        setErrors([description]);
+        toast({ title: "Could not save ad", description, variant: "destructive" });
       },
     });
   }, [saveMutation]);
@@ -701,28 +717,52 @@ export default function AdsManager() {
               </div>
 
               <ImageField
-                label="Ad Creative *"
+                label="Ad Creative — Desktop *"
                 value={editing.image_url}
                 onChange={(url) => setEditing({ ...editing, image_url: url })}
               />
+              <p className="-mt-2 text-[10px] text-muted-foreground/70">
+                Supply at 1456 × 180 for a Banner Top leaderboard (2× of 728 × 90).
+              </p>
 
-              {/* Live preview */}
-              {editing.image_url && (
+              <ImageField
+                label="Ad Creative — Mobile (optional)"
+                value={editing.image_url_mobile || ""}
+                onChange={(url) => setEditing({ ...editing, image_url_mobile: url })}
+              />
+              <p className="-mt-2 text-[10px] text-muted-foreground/70">
+                Supply at 640 × 200 (2× of 320 × 100). Shown on phones in place of the
+                desktop artwork. Leave empty and the desktop file is used everywhere —
+                it will still fit, just smaller.
+              </p>
+
+              {/* Live preview — both shapes, so you can see what each visitor gets */}
+              {(editing.image_url || editing.image_url_mobile) && (
                 <div className="border border-border/40 bg-black/20 p-3">
                   <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-muted-foreground/60 mb-2">Preview</p>
-                  <div className="mx-auto overflow-hidden border border-border/20" style={{ maxWidth: 400 }}>
-                    <img
-                      src={editing.image_url}
-                      alt="Preview"
-                      className="w-full object-contain"
-                      style={{ maxHeight: 200 }}
-                      onError={(e) => { e.target.style.display = "none"; }}
-                    />
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {[
+                      { url: editing.image_url, caption: "Desktop" },
+                      { url: editing.image_url_mobile, caption: "Mobile" },
+                    ].filter((entry) => entry.url).map((entry) => (
+                      <div key={entry.caption}>
+                        <p className="text-[8px] font-bold uppercase tracking-[0.25em] text-muted-foreground/60 mb-1">{entry.caption}</p>
+                        <div className="mx-auto overflow-hidden border border-border/20" style={{ maxWidth: 400 }}>
+                          <img
+                            src={entry.url}
+                            alt={`${entry.caption} preview`}
+                            className="w-full object-contain"
+                            style={{ maxHeight: 200 }}
+                            onError={(e) => { e.target.style.display = "none"; }}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 {/* Position selector */}
                 <div className="grid grid-cols-1 gap-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Position</label>
@@ -756,17 +796,7 @@ export default function AdsManager() {
                     <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div className="grid grid-cols-1 gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Monthly Rate (AUD)</label>
-                  <Input type="number" min="0" step="0.01" placeholder="0.00" value={editing.price_per_month || ''} onChange={(e) => setEditing({ ...editing, price_per_month: parseFloat(e.target.value) || 0 })} className="h-11 rounded-none font-mono" />
-                </div>
-                <div className="grid grid-cols-1 gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">CPM Rate (AUD)</label>
-                  <Input type="number" min="0" step="0.01" placeholder="0.00" value={editing.cpm_rate || ''} onChange={(e) => setEditing({ ...editing, cpm_rate: parseFloat(e.target.value) || 0 })} className="h-11 rounded-none font-mono" />
-                </div>
                 <div className="grid grid-cols-1 gap-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Device Target</label>
                   <div className="relative">
@@ -777,6 +807,17 @@ export default function AdsManager() {
                     </select>
                     <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Monthly Rate (AUD)</label>
+                  <Input type="number" min="0" step="0.01" placeholder="0.00" value={editing.price_per_month || ''} onChange={(e) => setEditing({ ...editing, price_per_month: parseFloat(e.target.value) || 0 })} className="h-11 rounded-none font-mono" />
+                </div>
+                <div className="grid grid-cols-1 gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">CPM Rate (AUD)</label>
+                  <Input type="number" min="0" step="0.01" placeholder="0.00" value={editing.cpm_rate || ''} onChange={(e) => setEditing({ ...editing, cpm_rate: parseFloat(e.target.value) || 0 })} className="h-11 rounded-none font-mono" />
                 </div>
               </div>
 

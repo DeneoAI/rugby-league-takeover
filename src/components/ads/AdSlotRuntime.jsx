@@ -186,6 +186,21 @@ function setMinimized(position, val) {
 
 const ROTATION_INTERVAL = 12000;
 
+// Presets that are a phone-shaped banner strip. An ad's optional mobile
+// creative is for exactly these — not for in-feed/sidebar rectangles, where a
+// wide 320×100 strip would render as a sliver inside a 300×250 box.
+const MOBILE_BANNER_PRESETS = new Set(["large-mobile-banner", "mobile-banner"]);
+
+// Which artwork this slot should show. Falls back to the main creative, so an
+// ad with no mobile file behaves exactly as it did before the column existed.
+function creativeFor(ad, effectiveSize) {
+  if (!ad) return "";
+  if (MOBILE_BANNER_PRESETS.has(effectiveSize) && ad.image_url_mobile) {
+    return ad.image_url_mobile;
+  }
+  return ad.image_url || "";
+}
+
 export default function AdSlotRuntime({ position, size, isAdmin, className, effectiveSize, preset, onAdsLoadState }) {
   const [ads, setAds] = useState([]);
   const [currentAd, setCurrentAd] = useState(null);
@@ -300,12 +315,18 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
     return () => clearTimeout(rotationTimer.current);
   }, [ads, currentAd, enabled]);
 
-  /* ── Set image source (shell already intersected, so we load immediately) ── */
+  /* ── Set image source (shell already intersected, so we load immediately) ──
+     Keyed on the RESOLVED creative, not image_url: rotating the phone from
+     portrait to landscape can cross the 728px preset boundary, and the slot
+     must swap artwork with it. */
+  const resolvedCreative = creativeFor(currentAd, effectiveSize);
   useEffect(() => {
-    if (currentAd?.image_url) {
-      setImgSrc(currentAd.image_url);
+    if (resolvedCreative) {
+      setImgSrc(resolvedCreative);
+      setImgError(false);
+      setImgRetried(false);
     }
-  }, [currentAd?.image_url]);
+  }, [resolvedCreative]);
 
   /* ── Impression Tracking ── */
   useEffect(() => {
@@ -377,13 +398,13 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
 
   const handleImgError = useCallback(() => {
     if (!mountedRef.current) return;
-    if (!imgRetried && currentAd?.image_url) {
+    if (!imgRetried && resolvedCreative) {
       setImgRetried(true);
-      setImgSrc(currentAd.image_url + (currentAd.image_url.includes("?") ? "&" : "?") + "_retry=1");
+      setImgSrc(resolvedCreative + (resolvedCreative.includes("?") ? "&" : "?") + "_retry=1");
     } else {
       setImgError(true);
     }
-  }, [imgRetried, currentAd?.image_url]);
+  }, [imgRetried, resolvedCreative]);
 
   if (!enabled) return null;
 

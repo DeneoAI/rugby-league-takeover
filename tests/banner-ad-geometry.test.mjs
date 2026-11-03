@@ -111,3 +111,16 @@ test("the creative scales up to the slot, not just down", () => {
   // contain, never cover: a mismatched ratio must letterbox, not crop.
   assert.match(img, /object-contain/);
 });
+
+test("no visible Sponsored chip covers the creative, but the disclosure remains", () => {
+  const runtime = code("../src/components/ads/AdSlotRuntime.jsx");
+
+  // The chip sat over the artwork's top-right corner and covered the copy
+  // there. It is gone from the rendered output.
+  assert.doesNotMatch(runtime, /^\s*Sponsored\s*$/m, "no visible Sponsored text node");
+
+  // The disclosure still exists where it costs no pixels: machine-readable
+  // for crawlers, and announced to screen readers.
+  assert.match(runtime, /rel="noopener noreferrer sponsored"/);
+  assert.match(runtime, /aria-label=\{`Sponsored: \$\{currentAd\.title/);
+});

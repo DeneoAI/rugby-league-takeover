@@ -592,17 +592,11 @@ export default function AdSlotRuntime({ position, size, isAdmin, className, effe
             />
           </div>
 
-          <span
-            className="absolute top-0 right-0 z-20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] font-mono pointer-events-none"
-            style={{
-              background: "hsl(var(--background) / 0.7)",
-              color: "hsl(var(--muted-foreground) / 0.6)",
-              borderLeft: "1px solid hsl(var(--border) / 0.3)",
-              borderBottom: "1px solid hsl(var(--border) / 0.3)",
-            }}
-          >
-            Sponsored
-          </span>
+          {/* No visible "Sponsored" chip: it sat over the artwork's top-right
+              corner and covered the copy there. The disclosure itself is kept
+              where it costs nothing — rel="sponsored" on the link for
+              crawlers, and the card's aria-label for screen readers — so the
+              ad is still declared as an ad without defacing the creative. */}
 
           <button
             onClick={handleMinimize}

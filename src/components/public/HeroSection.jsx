@@ -164,14 +164,13 @@ export default function HeroSection({ settings = {}, settingsLoading = false }) 
           transition={{ delay: 1, duration: 0.6 }}
           className="mt-12 w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 px-4"
         >
-          <a
-            href="#travel-registration"
-            onClick={handleTravelInterestClick}
-            className="group flex items-center justify-center gap-2.5 border border-primary bg-primary px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-[0_8px_30px_rgba(249,115,22,0.35)] hover:bg-primary/90 hover:shadow-[0_10px_36px_rgba(249,115,22,0.5)] transition-all duration-300 lg:hover:-translate-y-0.5 cursor-pointer text-center"
+          <Link
+            to="/store"
+            className="group flex items-center justify-center gap-2.5 border border-border bg-secondary/35 px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-300 hover:text-foreground hover:border-primary hover:bg-secondary/50 transition-all duration-300 lg:hover:-translate-y-0.5 text-center"
           >
-            <UserPlus className="h-4 w-4" />
-            <span>Register Travel Interest</span>
-          </a>
+            <ShoppingBag className="h-4 w-4" />
+            <span>Shop Takeover Merch</span>
+          </Link>
           <a
             href="#events"
             onClick={(e) => {
@@ -188,19 +187,20 @@ export default function HeroSection({ settings = {}, settingsLoading = false }) 
             <span>View Events</span>
           </a>
           <Link
-            to="/store"
-            className="group flex items-center justify-center gap-2.5 border border-border bg-secondary/35 px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-300 hover:text-foreground hover:border-primary hover:bg-secondary/50 transition-all duration-300 lg:hover:-translate-y-0.5 text-center"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            <span>Shop Supporter Merch</span>
-          </Link>
-          <Link
             to="/forum"
             className="group flex items-center justify-center gap-2.5 border border-border bg-secondary/35 px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-300 hover:text-foreground hover:border-primary hover:bg-secondary/50 transition-all duration-300 lg:hover:-translate-y-0.5 text-center"
           >
             <MessageSquare className="h-4 w-4" />
             <span>Join Fan Forum</span>
           </Link>
+          <a
+            href="#travel-registration"
+            onClick={handleTravelInterestClick}
+            className="group flex items-center justify-center gap-2.5 border border-primary bg-primary px-6 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-[0_8px_30px_rgba(249,115,22,0.35)] hover:bg-primary/90 hover:shadow-[0_10px_36px_rgba(249,115,22,0.5)] transition-all duration-300 lg:hover:-translate-y-0.5 cursor-pointer text-center"
+          >
+            <UserPlus className="h-4 w-4" />
+            <span>Register Travel Interest</span>
+          </a>
         </motion.div>
 
       </div>

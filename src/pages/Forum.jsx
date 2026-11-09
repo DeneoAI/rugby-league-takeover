@@ -180,7 +180,7 @@ function ForumQuickActionRail({ onStartDiscussion, onOpenTools }) {
   const quickActions = [
     {
       icon: MessageSquare,
-      label: "Ask the crowd",
+      label: "New Post",
       body: "Start a thread for flights, hotels, tickets, meetups, or game-day plans.",
       action: "New thread",
       onClick: onStartDiscussion,
@@ -1127,17 +1127,35 @@ export default function Forum() {
     setDeleteTarget(null);
   }, [deleteTarget, deleteMutation]);
 
+  const isDesktopForum = () =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+
+  // On desktop the composer is the "Start a Discussion" card inside the right
+  // sidebar, which is its own sticky scroll box with the rank card, missions
+  // and an ad ABOVE the form. Scrolling to the sidebar's top (the old target)
+  // left the form below the fold of that inner box, so "New Post" looked like
+  // it did nothing. Scroll the card itself into view and focus the title.
+  const focusDesktopComposer = useCallback(() => {
+    requestAnimationFrame(() => {
+      const card = document.getElementById("forum-compose-card")
+        || document.getElementById("forum-compose-sidebar");
+      card?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const title = document.getElementById("forum-compose-title");
+      if (title) {
+        try { title.focus({ preventScroll: true }); } catch { title.focus(); }
+      }
+    });
+  }, []);
+
   const openDiscussionComposer = useCallback(() => {
-    if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
+    if (isDesktopForum()) {
       setMobileTab("feed");
-      requestAnimationFrame(() => {
-        const composer = document.getElementById("forum-compose-sidebar");
-        if (composer) composer.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      setSubmittedForReview(false);
+      focusDesktopComposer();
       return;
     }
     setShowMobileCompose(true);
-  }, []);
+  }, [focusDesktopComposer]);
 
   const handleToggleReply = useCallback((postId) => {
     if (!isAuthenticated) {
@@ -1158,14 +1176,12 @@ export default function Forum() {
     setEditTarget(post);
     // The mobile sheet is lg:hidden — opening it on desktop showed nothing
     // while still locking body scroll. Desktop edits use the sidebar composer.
-    if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
-      requestAnimationFrame(() => {
-        document.getElementById("forum-compose-sidebar")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+    if (isDesktopForum()) {
+      focusDesktopComposer();
       return;
     }
     setShowMobileCompose(true);
-  }, []);
+  }, [focusDesktopComposer]);
 
   const allThreads = useMemo(() => buildForumThreads(posts), [posts]);
 
@@ -1890,7 +1906,7 @@ export default function Forum() {
                     body: `Hey fellow fans! I am sitting in ${q}. Let's coordinate and sync up at the game!`,
                     category: "MatchDay",
                   }));
-                  window.scrollTo({ top: 300, behavior: "smooth" });
+                  focusDesktopComposer();
                   try {
                     localStorage.setItem("rlt_seat_claimed", q);
                     window.dispatchEvent(new CustomEvent("rlt_badge_event", { detail: { action: "claim_seat" } }));
@@ -1908,7 +1924,7 @@ export default function Forum() {
                     body: `Here is my match prediction for ${label}: ${home} ${homeScore} - ${awayScore} ${away}! Let's go! What are your score predictions?`,
                     category: "MatchDay",
                   }));
-                  window.scrollTo({ top: 300, behavior: "smooth" });
+                  focusDesktopComposer();
                 }}
               />
             </Suspense>

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 import { shouldEnablePwa } from "@/lib/pwa-env";
+import { hasDirtyDrafts } from "@/lib/form-drafts";
 
 // Detects a freshly published build and moves the installed PWA onto it so it
 // never gets stuck on a stale bundle. Reliability notes:
@@ -83,7 +84,10 @@ export default function PwaUpdatePrompt() {
     const onHidden = () => {
       if (
         document.visibilityState === "hidden" &&
-        !window.location.pathname.startsWith("/store")
+        !window.location.pathname.startsWith("/store") &&
+        // Someone half way through a form (ad, product, post, listing) is
+        // probably in another app copying details. Don't reload under them.
+        !hasDirtyDrafts()
       ) {
         applyUpdate(waiting);
       }

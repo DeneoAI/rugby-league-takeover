@@ -10,6 +10,7 @@ import { Save, Trash2, Plus, X, ShoppingBag, Package, DollarSign, Eye, EyeOff, E
 import ImageField from "./ImageField";
 import AdminConfirmSheet from "./shared/AdminConfirmSheet";
 import { toast } from "@/components/ui/use-toast";
+import { useFormDraft } from "@/hooks/use-form-draft";
 
 const LOW_STOCK = 5;
 const stockBadge = (qty) => {
@@ -372,8 +373,9 @@ function ProductSkeleton({ index }) {
 
 /* ── Main Component ── */
 export default function ProductsManager({ products, loading }) {
-  const [draft, setDraft] = useState(emptyProduct);
-  const [showCreate, setShowCreate] = useState(false);
+  // Survives the app being backgrounded/killed mid-form (see use-form-draft).
+  const [draft, setDraft] = useFormDraft("admin:product:new", emptyProduct);
+  const [showCreate, setShowCreate] = useFormDraft("admin:product:new:open", false);
   const [confirmProductId, setConfirmProductId] = useState(null);
   const queryClient = useQueryClient();
 

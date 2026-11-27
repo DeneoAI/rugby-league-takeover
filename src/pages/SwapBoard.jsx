@@ -9,6 +9,7 @@ import {
 import { base44 } from "@/api/base44Client";
 import { appParams } from "@/lib/app-params";
 import { useAuth } from "@/lib/AuthContext";
+import { useFormDraft } from "@/hooks/use-form-draft";
 import { findMatches } from "@/lib/swap-match";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -139,14 +140,28 @@ function ListingCard({ listing, onWithdraw, onConfirm, busy }) {
 }
 
 /* ── Create listing form ── */
+const EMPTY_LISTING = {
+  haveTeam: "", haveSize: "", haveCondition: "", description: "",
+  imageUrl: "", wantTeamsRaw: "", wantSizes: [],
+};
+
 function CreateListingForm({ onClose, onCreated }) {
-  const [haveTeam, setHaveTeam] = useState("");
-  const [haveSize, setHaveSize] = useState("");
-  const [haveCondition, setHaveCondition] = useState("");
-  const [description, setDescription] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [wantTeamsRaw, setWantTeamsRaw] = useState("");
-  const [wantSizes, setWantSizes] = useState([]);
+  // Saved as it is typed, so switching apps (to grab a photo or a team name)
+  // and coming back never loses the listing, even if the OS killed the page.
+  const [form, setForm, discardForm] = useFormDraft("swap:new", EMPTY_LISTING);
+  const { haveTeam, haveSize, haveCondition, description, imageUrl, wantTeamsRaw, wantSizes } = form;
+  const setField = (field) => (value) =>
+    setForm((current) => ({
+      ...current,
+      [field]: typeof value === "function" ? value(current[field]) : value,
+    }));
+  const setHaveTeam = setField("haveTeam");
+  const setHaveSize = setField("haveSize");
+  const setHaveCondition = setField("haveCondition");
+  const setDescription = setField("description");
+  const setImageUrl = setField("imageUrl");
+  const setWantTeamsRaw = setField("wantTeamsRaw");
+  const setWantSizes = setField("wantSizes");
   const [submitting, setSubmitting] = useState(false);
 
   const toggleWantSize = (size) =>
@@ -191,6 +206,7 @@ function CreateListingForm({ onClose, onCreated }) {
       if (!response?.data?.ok) throw new Error(response?.data?.error || "Could not create the listing");
 
       toast({ title: "Listing live! 🏉", description: "Your jersey is on the board and its forum thread is open." });
+      discardForm();
       onCreated();
       onClose();
     } catch (error) {
@@ -211,7 +227,7 @@ function CreateListingForm({ onClose, onCreated }) {
         <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-foreground">
           <Plus className="h-4 w-4 text-primary" /> List a jersey
         </p>
-        <button type="button" onClick={onClose} aria-label="Close" className="touch-target flex items-center justify-center text-muted-foreground hover:text-foreground">
+        <button type="button" onClick={() => { discardForm(); onClose(); }} aria-label="Close" className="touch-target flex items-center justify-center text-muted-foreground hover:text-foreground">
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -323,7 +339,7 @@ export default function SwapBoard() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [showCreate, setShowCreate] = useState(false);
+  const [showCreate, setShowCreate] = useFormDraft("swap:new:open", false);
   const [confirmTarget, setConfirmTarget] = useState(null);
 
   const { data: listings = [], isLoading } = useQuery({

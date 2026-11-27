@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ImageField from "./ImageField";
+import { useFormDraft } from "@/hooks/use-form-draft";
 
 const emptyArticle = { title: "", body: "", image_url: "", published_date: new Date().toISOString().slice(0, 10), author: "RLT Vegas", is_published: true };
 
@@ -257,8 +258,9 @@ function ArticleCard({ article, index, updateMutation, deleteMutation }) {
 
 /* ─── Main NewsManager ──────────────────────────────────── */
 export default function NewsManager({ articles }) {
-  const [draft, setDraft] = useState(emptyArticle);
-  const [formOpen, setFormOpen] = useState(false);
+  // Survives the app being backgrounded/killed mid-form (see use-form-draft).
+  const [draft, setDraft] = useFormDraft("admin:news:new", emptyArticle);
+  const [formOpen, setFormOpen] = useFormDraft("admin:news:new:open", false);
   const queryClient = useQueryClient();
 
   const refreshNews = async () => {

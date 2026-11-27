@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import ImageField from "./ImageField";
+import { useFormDraft } from "@/hooks/use-form-draft";
 
 /* ── Constants ────────────────────────────────────────────── */
 const LS_KEY = "rlt_sponsors";
@@ -382,8 +383,9 @@ function SponsorCard({ sponsor, index, onEdit, onDelete, onToggleActive }) {
 export default function SponsorManager() {
   /* ── State ── */
   const [sponsors, setSponsors] = useState(() => readLS(LS_KEY, []));
-  const [editing, setEditing] = useState(null);
-  const [view, setView] = useState("grid"); // "grid" | "form"
+  // Survives the app being backgrounded/killed mid-form (see use-form-draft).
+  const [editing, setEditing] = useFormDraft("admin:sponsor", null);
+  const [view, setView] = useState(() => (editing ? "form" : "grid")); // "grid" | "form"
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState("tier");
   const [errors, setErrors] = useState([]);

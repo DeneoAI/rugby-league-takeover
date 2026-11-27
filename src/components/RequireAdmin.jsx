@@ -14,7 +14,9 @@ export default function RequireAdmin({ children }) {
   const { isAuthenticated, isAdmin, isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const location = useLocation();
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  // Only block before we know who the user is. Once signed in, a background
+  // re-check must never unmount the page (it would wipe any open form).
+  if (isLoadingPublicSettings || (isLoadingAuth && !isAuthenticated)) {
     return <Spinner />;
   }
 

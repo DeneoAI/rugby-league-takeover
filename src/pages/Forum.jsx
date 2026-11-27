@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FORUM_CATEGORIES, buildForumThreads, buildPendingForumPost } from "@/lib/public-forms";
 import { appParams } from "@/lib/app-params";
 import { useAuth } from "@/lib/AuthContext";
+import { markDraftDirty } from "@/lib/form-drafts";
 import { toast } from "@/components/ui/use-toast";
 import ReplyTree from "@/components/forum/ReplyTree";
 import ReactionPicker from "@/components/forum/ReactionPicker";
@@ -865,16 +866,17 @@ export default function Forum() {
   // duplicate thread.
   useEffect(() => {
     if (editTarget) return;
-    const hasDraftContent = draft.title || draft.body;
+    const hasDraftContent = !!(draft.title || draft.body);
+    markDraftDirty("forum:new", hasDraftContent);
     if (!hasDraftContent) {
       try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch {}
       return;
     }
-    const timer = setTimeout(() => {
-      try { localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft)); } catch {}
-    }, 2000);
-    return () => clearTimeout(timer);
+    // Saved straight away (no debounce): people type a line, swipe to another
+    // app to copy something, and the OS may kill the page before a timer fires.
+    try { localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft)); } catch {}
   }, [draft, editTarget]);
+  useEffect(() => () => markDraftDirty("forum:new", false), []);
 
   // "/" keyboard shortcut focuses the forum search (desktop power-user nicety)
   useEffect(() => {

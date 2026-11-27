@@ -11,7 +11,8 @@ const DefaultFallback = () => (
 export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthenticatedElement }) {
   const { isAuthenticated, isLoadingAuth, authError } = useAuth();
 
-  if (isLoadingAuth) {
+  // Keep the page mounted during a background re-check once signed in.
+  if (isLoadingAuth && !isAuthenticated) {
     return fallback;
   }
 

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import ImageField from "./ImageField";
+import { useFormDraft } from "@/hooks/use-form-draft";
 
 /* ── Constants ── */
 const POSITIONS = [
@@ -117,8 +118,9 @@ export default function AdsManager() {
 
   /* ── Local UI state ── */
   const [stats, setStats] = useState(() => readLS("rlt_ad_stats", {}));
-  const [editing, setEditing] = useState(null);
-  const [view, setView] = useState("slots");
+  // Survives the app being backgrounded/killed mid-form (see use-form-draft).
+  const [editing, setEditing] = useFormDraft("admin:ad", null);
+  const [view, setView] = useState(() => (editing ? "form" : "slots"));
   const [errors, setErrors] = useState([]);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [sponsors] = useState(() => readLS('rlt_sponsors', []));

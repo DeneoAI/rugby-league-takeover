@@ -40,8 +40,8 @@ const categories = [
 export default function ComposeSidebar({ draft, setDraft, isAuthenticated, user, submittedForReview, onSubmit, isPending, editTarget = null, onCancelEdit, allThreads, people = [], onFilterSearch, onClaimSeat, searchQuery, onSharePrediction }) {
   return (
     <aside className="sticky top-24 space-y-4">
-      {/* Compose Card */}
-      <div className="border border-border/60 bg-card/30 cmd-glass overflow-hidden">
+      {/* Compose Card — id is the scroll/focus target for "New Post" on desktop */}
+      <div id="forum-compose-card" className="scroll-mt-4 border border-border/60 bg-card/30 cmd-glass overflow-hidden">
         <div className="h-[2px] w-full cmd-accent-bar" />
         <div className="p-5">
           <div className="flex items-center gap-3 mb-1">
@@ -116,7 +116,7 @@ export default function ComposeSidebar({ draft, setDraft, isAuthenticated, user,
 
             <div className="space-y-1">
               <label className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-200">Topic Title</label>
-              <Input required placeholder="What's on your mind?" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="h-11 rounded-none border-border bg-background text-sm" />
+              <Input id="forum-compose-title" required placeholder="What's on your mind?" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className="h-11 rounded-none border-border bg-background text-sm" />
             </div>
 
             <div className="space-y-1">
